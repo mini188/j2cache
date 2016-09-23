@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.j2server.j2cache.cache.ICache;
+import org.j2server.j2cache.utils.PropsUtils;
+
+import redis.clients.jedis.Jedis;
 
 import com.alibaba.fastjson.JSON;
 
@@ -15,19 +18,20 @@ import com.alibaba.fastjson.JSON;
 public class RedisCache<K, V> implements ICache<K, V> {
 	private Class<?> keyClass;
 	private Class<?> valueClass;
-	private static JedisTemplate jedisTemp;
 	private String name;
 	private int cacheSize = 0;
 	private long maxCacheSize;
 	private long maxLifetime;
 	
+	private Jedis jedis;
+	
 	public RedisCache(String name, long maxSize, long maxLifetime, Class<?> keyClass, Class<?> valueCalss) {
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-	    jedisTemp = JedisTemplate.getInstance();
 	    this.keyClass = keyClass;
 	    this.valueClass = valueCalss;
+	    this.jedis = new Jedis(PropsUtils.getRedisHost(), PropsUtils.getRedisPort());
 	}
 	
 	/**
@@ -35,7 +39,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public int size() {	
-		return jedisTemp.hgetAll(name).size();
+		return jedis.hgetAll(name).size();
 	}
 	
 	/**
@@ -43,7 +47,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public boolean isEmpty() {
-		return jedisTemp.hgetAll(name).isEmpty();
+		return jedis.hgetAll(name).isEmpty();
 	}
 	
 	/**
@@ -51,7 +55,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public boolean containsKey(Object key) {
-		return jedisTemp.hexists(name, JSON.toJSONString(key));
+		return jedis.hexists(name, JSON.toJSONString(key));
 	}
 	
 	/**
@@ -59,7 +63,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public boolean containsValue(Object value) {
-		return jedisTemp.hvals(name).contains(value);
+		return jedis.hvals(name).contains(value);
 	}
 	
 	/**
@@ -67,7 +71,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public V get(Object key) {
-		String json = jedisTemp.hget(name, JSON.toJSONString(key)); 
+		String json = jedis.hget(name, JSON.toJSONString(key)); 
 		return (V) JSON.parseObject(json, valueClass);
 	}
 	
@@ -76,7 +80,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public V put(K key, V value) {
-		jedisTemp.hset(name, JSON.toJSONString(key), JSON.toJSONString(value));
+		jedis.hset(name, JSON.toJSONString(key), JSON.toJSONString(value));
 		return value;
 	}
 	
@@ -85,7 +89,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public V remove(Object key) {
-		jedisTemp.hdel(name, JSON.toJSONString(key));
+		jedis.hdel(name, JSON.toJSONString(key));
 		return null;
 	}
 	
@@ -96,7 +100,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	public void putAll(Map<? extends K, ? extends V> m) {
 		if(null != m){
 			for (java.util.Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {  
-				jedisTemp.hset(name, JSON.toJSONString(entry.getKey()), JSON.toJSONString(entry.getValue()));
+				jedis.hset(name, JSON.toJSONString(entry.getKey()), JSON.toJSONString(entry.getValue()));
 			} 	
 		}
 		 
@@ -107,17 +111,17 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public void clear() {
-		Set<String> keySet = jedisTemp.hgetAll(name).keySet();
+		Set<String> keySet = jedis.hgetAll(name).keySet();
 		String[] strs = Arrays.asList( keySet.toArray() ).toArray(new String[0]);
 		if(null != keySet && keySet.size()>0){
-			jedisTemp.hdel(name,strs);
+			jedis.hdel(name,strs);
 		}
 	}
 
 	@Override
 	public Set<K> keySet() {
 		Set<K> result = new HashSet<K>();
-		Set<String> keys = jedisTemp.hgetAll(name).keySet();
+		Set<String> keys = jedis.hgetAll(name).keySet();
 		for (String key: keys) {
 			result.add((K)JSON.parseObject(key, keyClass));
 		}
@@ -130,15 +134,15 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	@Override
 	public Collection<V> values() {
 		Collection<V> list = new ArrayList<V>();
-		Set<String> keysSet = jedisTemp.hkeys(name);
+		Set<String> keysSet = jedis.hkeys(name);
 		for (String string : keysSet) {
-			list.add((V) JSON.parseObject(jedisTemp.hget(name,string), valueClass));
+			list.add((V) JSON.parseObject(jedis.hget(name,string), valueClass));
 		}
 		return list;
 	}
 
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		Set<java.util.Map.Entry<String, String>> entry = jedisTemp.hgetAllEntry(name);
+		Set<java.util.Map.Entry<String, String>> entry = jedis.hgetAll(name).entrySet();
 		Set<java.util.Map.Entry<K, V>> e2 = new HashSet<java.util.Map.Entry<K, V>>();
 		for (Entry<String, String> e : entry) {
 			e2.add((java.util.Map.Entry<K, V>) e);

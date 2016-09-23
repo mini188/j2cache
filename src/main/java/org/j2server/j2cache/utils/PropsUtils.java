@@ -1,5 +1,6 @@
 package org.j2server.j2cache.utils;
 
+import org.j2server.j2cache.cache.iginte.IgniteCacheStategy;
 import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
 
 
@@ -10,6 +11,7 @@ import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
  * 工具类，需要更改的是类中PropertiesLoader的构造函数参数。
  */
 public class PropsUtils {
+	private static String cacheStrategyClass = DefaultCacheStategy.class.getName();
 
 	/**
 	 * 获取获取的最大长度
@@ -24,15 +26,19 @@ public class PropsUtils {
 	}
 	
 	public static String getCacheStrategyClass() {
-		return DefaultCacheStategy.class.getName();
+		return cacheStrategyClass;
+	}
+	
+	public static void setCacheStrategyClass(String stategy) {
+		cacheStrategyClass = stategy;
 	}
 	
 	public static String getRedisHost() {
-		return "";
+		return "localhost";
 	}
 	
 	public static int getRedisPort() {
-		return 0;
+		return 6379;
 	}
 	
 	public static String getRedisPassword() {
