@@ -24,20 +24,31 @@ public class TestHazelcastCache {
 	@Test
 	public void test() {
 		PropsUtils.setCacheStrategyClass(HazelcastCacheStategy.class.getName());
-		ICache<String, DataClass> hazelcasthCache = CacheManager.getOrCreateCache("hazelcasthCache", String.class, DataClass.class);
+		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("hazelcastCache", String.class, DataClass.class);
 		
-		System.out.println("开始测试写入缓存" + hazelcasthCache.getName());
+		Integer cnt = 1000000;
+		System.out.println("开始测试写入缓存" + cache.getName());
 		long begin = System.currentTimeMillis();
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < cnt; i++) {
 			DataClass dc = new DataClass();
 			dc.setName(Integer.toString(i));
 			dc.setValue(i);
 			dc.setStrValue("asdfadsfasfda");
-			hazelcasthCache.put(Integer.toString(i), dc);
+			cache.put(Integer.toString(i), dc);
 		}
 		long end = System.currentTimeMillis();		
 		System.out.println("总共耗时：" + (end - begin));
-		System.out.println("每毫秒写入:"+1000000/(end - begin)+"条。");  
-        System.out.println("每秒写入:"+(1000000/(end - begin))*1000+"条。"); 
+		System.out.println("每毫秒写入:"+cnt/(end - begin)+"条。");  
+        System.out.println("每秒写入:"+(cnt/(end - begin))*1000+"条。"); 
+        
+        System.out.println("开始测试读取缓存" + cache.getName());
+        begin = System.currentTimeMillis();
+		for (int i = 0; i < cnt; i++) {
+			DataClass dc = cache.get(Integer.toString(i));
+		}
+		end = System.currentTimeMillis();		
+		System.out.println("读取总共耗时：" + (end - begin));
+		System.out.println("每毫秒读取:"+cnt/(end - begin)+"条。");  
+        System.out.println("每秒读取:"+(cnt/(end - begin))*1000+"条。");       
 	}
 }

@@ -10,7 +10,7 @@ public class IgniteInstance {
 	private IgniteInstance() {
 	}
 	
-	public static IgniteInstance getInstance() {
+	public synchronized static IgniteInstance getInstance() {
 		return _instance;
 	}
 	

@@ -6,12 +6,7 @@ import java.util.Set;
 
 import org.j2server.j2cache.cache.ICache;
 
-import com.hazelcast.config.ClasspathXmlConfig;
-import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.map.impl.operation.MapPartitionDestroyTask;
 
 public class HazelcastCache<K, V> implements ICache<K, V>{
 	private String name;
@@ -19,21 +14,12 @@ public class HazelcastCache<K, V> implements ICache<K, V>{
 	private long maxLifetime;
 	private int cacheSize = 0;
 	protected IMap map;
-	private static HazelcastInstance hazelcast = null;
 	
 	public HazelcastCache(String name, long maxSize, long maxLifetime) {
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-        //ClassLoader loader = new ClusterClassLoader();
-        //Thread.currentThread().setContextClassLoader(loader);
-		
-        Config config = new ClasspathXmlConfig("org/j2server/j2cache/cache/hazelcast/hazelcast-cache-config.xml");
-        config.setInstanceName("j2cache");
-        //config.setClassLoader(loader);
-		hazelcast = Hazelcast.getOrCreateHazelcastInstance(config);
-		
-		map = hazelcast.getMap(name);
+		map = HazelcastLocal.getInstance().getHazelcast().getMap(name);
 	}
 	
 	@Override
@@ -103,7 +89,7 @@ public class HazelcastCache<K, V> implements ICache<K, V>{
 
 	@Override
 	public void setName(String name) {
-		//this.name = name;
+		this.name = name;
 	}
 
 	@Override
