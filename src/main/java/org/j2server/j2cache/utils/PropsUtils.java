@@ -1,6 +1,5 @@
 package org.j2server.j2cache.utils;
 
-import org.j2server.j2cache.cache.iginte.IgniteCacheStategy;
 import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
 
 
