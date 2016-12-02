@@ -1,6 +1,9 @@
 package org.j2server.j2cache.cache.iginte;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -72,19 +75,36 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 
 	@Override
 	public Set<K> keySet() {
-		return null;
+		Set<K> keySet = new HashSet<K>();
+		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
+		while (it.hasNext()) {
+			keySet.add(it.next().getKey());
+		}
+		return keySet;
 	}
 
 	@Override
 	public Collection<V> values() {
-		Collection<V> vals = null;
-		
+		Collection<V> vals = new ArrayList<V>();
+		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
+		while (it.hasNext()) {
+			vals.add(it.next().getValue());
+		}
 		return vals;
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		return null;
+	public Set<Entry<K, V>> entrySet() {
+		Set<Entry<K, V>> entrySet = new HashSet<Entry<K,V>>();
+		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
+		while (it.hasNext()) {
+			javax.cache.Cache.Entry<K, V> e =it.next();
+			EntryWapper<K, V> wapper = new EntryWapper<K, V>();
+			wapper.setKey(e.getKey());
+			wapper.setValue(e.getValue());
+			entrySet.add(wapper);
+		}
+		return entrySet;
 	}
 
 	@Override
@@ -122,4 +142,36 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 		return this.cacheSize;
 	}
 
+	/**
+	 * 用于
+	 * @author xiexb
+	 *
+	 * @param <K>
+	 * @param <V>
+	 */
+	static class EntryWapper<K, V> implements java.util.Map.Entry<K, V> {
+		private K k;
+		private V v;
+		
+		@Override
+		public K getKey() {
+			return k;
+		}
+
+		@Override
+		public V getValue() {
+			return v;
+		}
+
+		@Override
+		public V setValue(V value) {
+			v = value;
+			return v;
+		}
+		
+		public K setKey(K value) {
+			k = value;
+			return k;
+		}
+	}
 }
