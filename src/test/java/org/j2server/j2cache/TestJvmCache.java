@@ -49,4 +49,25 @@ public class TestJvmCache {
 		System.out.println("每毫秒读取:"+cnt/(end - begin)+"条。");  
         System.out.println("每秒读取:"+(cnt/(end - begin))*1000+"条。");       
 	}
+	
+	@Test
+	public void testExprie() {
+		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache", String.class, DataClass.class, 0, 2000l);
+		cache.put("a", "bb");
+		
+		System.out.println("try get cache:" + cache.get("a"));
+		
+		try {
+			Thread.sleep(1900);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache1:" + cache.get("a"));	
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache2:" + cache.get("a"));			
+	}
 }

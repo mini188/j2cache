@@ -7,19 +7,29 @@ import org.j2server.j2cache.utils.PropsUtils;
 @SuppressWarnings("rawtypes")
 public class RedisCacheStategy implements ICacheStrategy {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public ICache createCache(String name, Class<?> keyClass, Class<?> valueCalss) {
-		return new RedisCache(name
-				, PropsUtils.getCacheMaxSize()
-				, PropsUtils.getCacheMaxLifeTime()
+		return createCache(name
 				, keyClass
-				, valueCalss);
+				, valueCalss				
+				, PropsUtils.getCacheMaxSize()
+				, PropsUtils.getCacheMaxLifeTime());
 	}
 
 	@Override
 	public void destroyCache(ICache cache) {
 		cache.clear();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ICache createCache(String name, Class<?> keyClass,
+			Class<?> valueCalss, long maxSize, long maxLifetime) {
+		return new RedisCache(name
+				, maxSize
+				, maxLifetime
+				, keyClass
+				, valueCalss);
 	}
 
 }

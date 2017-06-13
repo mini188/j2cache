@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.utils.PropsUtils;
 
@@ -32,6 +33,13 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	    this.keyClass = keyClass;
 	    this.valueClass = valueCalss;
 	    this.jedis = new Jedis(PropsUtils.getRedisHost(), PropsUtils.getRedisPort());
+	    if (StringUtils.isNotEmpty(PropsUtils.getRedisPassword())) {
+	    	this.jedis.auth(PropsUtils.getRedisPassword());
+	    }	    
+		if (maxLifetime > 0) {
+			int secodes = (int) (maxLifetime / 1000);
+			jedis.expire(name, secodes);
+		}
 	}
 	
 	/**

@@ -45,13 +45,47 @@ public class TestRedisCache {
         
         System.out.println("开始测试读取缓存" + cache.getName());
         begin = System.currentTimeMillis();
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < cnt; i++) {
 			DataClass dc = cache.get(Integer.toString(i));
 		}
 		end = System.currentTimeMillis();		
 		System.out.println("读取总共耗时：" + (end - begin));
-		System.out.println("每毫秒读取:"+1000000/(end - begin)+"条。");  
-        System.out.println("每秒读取:"+(1000000/(end - begin))*1000+"条。");      
+		System.out.println("每毫秒读取:"+cnt/(end - begin)+"条。");  
+        System.out.println("每秒读取:"+(cnt/(end - begin))*1000+"条。");      
+	}
+	
+	@Test
+	public void testExprie() {
+		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
+		ICache<String, String> cache = CacheManager.getOrCreateCache("redisCache", String.class, String.class, 0, 1000l);
+		cache.put("a", "bb");
+		
+		System.out.println("try get cache:" + cache.get("a"));
+		
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache1:" + cache.get("a"));	
+		try {
+			Thread.sleep(900);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache2:" + cache.get("a"));
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache3:" + cache.get("a"));		
+		try {
+			Thread.sleep(1100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache4:" + cache.get("a"));			
 	}
 
 }

@@ -10,7 +10,9 @@ public class IgniteCacheStategy implements ICacheStrategy {
 	@Override
 	public ICache createCache(String name, Class<?> keyClass,
 			Class<?> valueCalss) {
-		return new IgniteCache(name
+		return createCache(name
+				, keyClass
+				, valueCalss
 				, PropsUtils.getCacheMaxSize()
 				, PropsUtils.getCacheMaxLifeTime()
 				);
@@ -19,6 +21,14 @@ public class IgniteCacheStategy implements ICacheStrategy {
 	@Override
 	public void destroyCache(ICache cache) {
 		cache.clear();
+	}
+
+	@Override
+	public ICache createCache(String name, Class<?> keyClass,
+			Class<?> valueCalss, long maxSize, long maxLifetime) {
+		return new IgniteCache(name
+				, maxSize
+				, maxLifetime);
 	}
 
 }

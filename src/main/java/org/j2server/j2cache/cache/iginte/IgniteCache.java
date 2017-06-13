@@ -6,8 +6,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
 
 import org.apache.ignite.cache.CachePeekMode;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.j2server.j2cache.cache.ICache;
 
 @SuppressWarnings("unchecked")
@@ -22,7 +27,10 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-	    map = IgniteInstance.getInstance().getIgnite().getOrCreateCache(name);
+		CacheConfiguration<K, V> config = new CacheConfiguration<K, V>();
+		config.setName(name);
+		config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.MILLISECONDS, maxLifetime)));
+	    map = IgniteInstance.getInstance().getIgnite().getOrCreateCache(config);
 	}
 
 	@Override

@@ -43,6 +43,19 @@ public class CacheManager {
         caches.put(cacheName, cache);
 		return cache;
 	}
+	
+	
+	public static synchronized <T extends ICache> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
+		T cache = (T) caches.get(cacheName);
+	    if (cache != null) {
+	        return cache;
+	    }
+	    
+	    cache = (T) cacheStrategy.createCache(cacheName, keyClass, valueCalss, maxSize, maxLifetime);
+	    caches.put(cacheName, cache);
+		return cache;
+	}
+
 
 	public static synchronized void destroyCache(String cacheName) {
 		ICache cache = caches.remove(cacheName);

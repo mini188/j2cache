@@ -3,6 +3,7 @@ package org.j2server.j2cache;
 import org.j2server.j2cache.cache.CacheManager;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.cache.iginte.IgniteCacheStategy;
+import org.j2server.j2cache.cache.redis.RedisCacheStategy;
 import org.j2server.j2cache.entites.DataClass;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.junit.After;
@@ -51,6 +52,40 @@ public class TestIginteCache {
 		System.out.println("读取总共耗时：" + (end - begin));
 		System.out.println("每毫秒读取:"+cnt/(end - begin)+"条。");  
         System.out.println("每秒读取:"+(cnt/(end - begin))*1000+"条。");     
+	}
+	
+	@Test
+	public void testExprie() {
+		PropsUtils.setCacheStrategyClass(IgniteCacheStategy.class.getName());
+		ICache<String, String> cache = CacheManager.getOrCreateCache("igniteCache", String.class, String.class, 0, 3000l);
+		cache.put("a", "bb");
+		
+		System.out.println("try get cache:" + cache.get("a"));
+		
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache1:" + cache.get("a"));	
+		try {
+			Thread.sleep(900);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache2:" + cache.get("a"));
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache3:" + cache.get("a"));		
+		try {
+			Thread.sleep(1100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("try get exprie cache4:" + cache.get("a"));			
 	}
 	
 }
