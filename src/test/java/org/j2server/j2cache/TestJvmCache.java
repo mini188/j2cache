@@ -3,7 +3,9 @@ package org.j2server.j2cache;
 import org.j2server.j2cache.cache.CacheManager;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.entites.DataClass;
+import org.j2server.j2cache.entites.DataClassNormal;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -68,6 +70,37 @@ public class TestJvmCache {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("try get exprie cache2:" + cache.get("a"));			
+		System.out.println("try get exprie cache2:" + cache.get("a"));
+		try {
+		    cache.put("a", "bb");
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+		System.out.println("try set cache again:" + cache.get("a"));
+	}
+	
+	@Test
+	public void testDataClassNormal() {
+		ICache<String, DataClassNormal> cache = CacheManager.getOrCreateCache("jvmCache", String.class, DataClassNormal.class, 0, 2000l);
+		
+		DataClassNormal data = new DataClassNormal();
+		data.setName("a");
+		data.setStrValue("bb");
+		data.setValue(100l);
+		cache.put("a", data);
+		
+		Assert.assertNotNull(cache.get("a"));		
+		try {
+			Thread.sleep(1900);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		Assert.assertNotNull(cache.get("a"));	
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		Assert.assertNull(cache.get("a"));
 	}
 }

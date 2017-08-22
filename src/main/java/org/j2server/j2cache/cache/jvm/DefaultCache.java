@@ -342,6 +342,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
             if (expireTime > node.timestamp) {
             	// Remove the object
             	remove(node.key);
+            	keyLinklist.remove(node);
             }
         }
 	}
