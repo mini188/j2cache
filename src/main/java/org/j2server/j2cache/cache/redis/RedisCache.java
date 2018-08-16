@@ -80,6 +80,9 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	@Override
 	public V get(Object key) {
 		String json = jedis.hget(name, JSON.toJSONString(key)); 
+		if (json == null) {
+        	    return null;
+        	}
 		return (V) JSON.parseObject(json, valueClass);
 	}
 	
