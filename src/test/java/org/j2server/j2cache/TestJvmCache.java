@@ -44,7 +44,7 @@ public class TestJvmCache {
         System.out.println("开始测试读取缓存" + cache.getName());
         begin = System.currentTimeMillis();
 		for (int i = 0; i < cnt; i++) {
-			DataClass dc = cache.get(Integer.toString(i));
+			cache.get(Integer.toString(i));
 		}
 		end = System.currentTimeMillis();		
 		System.out.println("读取总共耗时：" + (end - begin));

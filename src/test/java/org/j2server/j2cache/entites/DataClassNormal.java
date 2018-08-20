@@ -1,9 +1,6 @@
 package org.j2server.j2cache.entites;
 
-import java.io.Serializable;
-
-public class DataClass implements Serializable{
-	private static final long serialVersionUID = 1505967573049775572L;
+public class DataClassNormal {
 	private String name;
 	private long value;
 	private String strValue;
