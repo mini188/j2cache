@@ -92,6 +92,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	@Override
 	public V put(K key, V value) {
 		jedis.hset(name, JSON.toJSONString(key), JSON.toJSONString(value));
+		setExpire();
 		return value;
 	}
 	
@@ -112,7 +113,9 @@ public class RedisCache<K, V> implements ICache<K, V> {
 		if(null != m){
 			for (java.util.Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {  
 				jedis.hset(name, JSON.toJSONString(entry.getKey()), JSON.toJSONString(entry.getValue()));
-			} 	
+			}
+			
+			setExpire();
 		}
 		 
 	}
@@ -194,5 +197,12 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	@Override
 	public int getCacheSize() {
 		return cacheSize;
+	}
+	
+	private Long setExpire() {
+		if (maxLifetime <= 0) {
+			return 0l;
+		}
+		return jedis.expire(name, (int) maxLifetime / 1000);
 	}
 }
