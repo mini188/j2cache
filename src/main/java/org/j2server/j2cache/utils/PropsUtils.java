@@ -11,6 +11,10 @@ import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
  */
 public class PropsUtils {
 	private static String cacheStrategyClass = DefaultCacheStategy.class.getName();
+	private static String redisHost= "127.0.0.1";
+
+	private static Integer redisPort = 6379;
+	private static String redisPwd = "";
 
 	/**
 	 * 获取获取的最大长度
@@ -33,14 +37,26 @@ public class PropsUtils {
 	}
 	
 	public static String getRedisHost() {
-		return "localhost";
+		return redisHost;
 	}
 	
 	public static int getRedisPort() {
-		return 6379;
+		return redisPort;
 	}
 	
 	public static String getRedisPassword() {
-		return "";
+		return redisPwd;
+	}
+
+	public static void setRedisPassword(String redisPwd) {
+		PropsUtils.redisPwd = redisPwd;
+	}
+
+	public static void setRedisHost(String redisHost) {
+		PropsUtils.redisHost = redisHost;
+	}
+
+	public static void setRedisPort(Integer redisPort) {
+		PropsUtils.redisPort = redisPort;
 	}
 }
