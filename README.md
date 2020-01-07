@@ -68,3 +68,19 @@ RAM:8G
 
 > Redis用的是Redis on Windows Redis-x64-3.2.100
 
+## 使用方法示例：
+```
+public static void main(String[] args) {
+		try {
+			ICache<String, String> cache = CacheManager.getOrCreateCache(DefaultCacheStategy.class.getName(), "jvmCache", String.class, String.class);
+			cache.put("key1", new Date().toString());
+			
+			String v = cache.get("key1");
+			System.err.println("cache value: " +v);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+```
+
+> 另外可以参考src/test/java 下的测试代码
