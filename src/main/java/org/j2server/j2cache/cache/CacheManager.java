@@ -34,7 +34,7 @@ public class CacheManager {
 		}
 	}	
 
-	public static synchronized <T extends ICache> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss) {
+	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss) {
 		return getOrCreateCache(cacheName, keyClass, valueCalss, 0l, 0l);
 	}
 	
@@ -47,7 +47,7 @@ public class CacheManager {
 	 * @throws Exception 如果provider为空时会抛出异常
 	 */
 	@SuppressWarnings("unchecked")
-	public static synchronized <T extends ICache> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
+	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
 		T cache = (T) caches.get(cacheName);
 	    if (cache != null) {
 	        return cache;
@@ -71,7 +71,7 @@ public class CacheManager {
 	 * @return 缓存对象
 	 * @throws Exception 如果stategy为空时会抛出异常
 	 */
-	public static synchronized <T extends ICache> T  getOrCreateCache(
+	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(
 			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss) throws Exception {
 		return getOrCreateCache(stategy, cacheName, keyClass, valueCalss, 0l, 0l);
 	}
@@ -88,7 +88,7 @@ public class CacheManager {
 	 * @throws Exception 如果stategy为空时会抛出异常
 	 */
 	@SuppressWarnings("unchecked")
-	public static synchronized <T extends ICache> T  getOrCreateCache(
+	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(
 			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss, 
 			long maxSize, long maxLifetime) throws Exception {
 		if (stategy == null) {
@@ -113,13 +113,13 @@ public class CacheManager {
 		}		
 	}
 	
-	public static ICache[] getAllCaches() {
-		List<ICache> values = new ArrayList<ICache>();
+	public static ICache<?,?>[] getAllCaches() {
+		List<ICache<?,?>> values = new ArrayList<ICache<?,?>>();
 		for (CacheObject item: caches.values()) {
 			values.add(item.getCache());
 		}
 			
-		return values.toArray(new ICache[values.size()]);
+		return values.toArray(new ICache<?,?>[values.size()]);
 	}
 	
 	/**
