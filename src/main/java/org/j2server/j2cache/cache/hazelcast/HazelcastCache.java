@@ -13,7 +13,7 @@ public class HazelcastCache<K, V> implements ICache<K, V>{
 	private long maxCacheSize;
 	private long maxLifetime;
 	private int cacheSize = 0;
-	protected IMap map;
+	protected IMap<K, V> map;
 	
 	public HazelcastCache(String name, long maxSize, long maxLifetime) {
 		this.name = name;
