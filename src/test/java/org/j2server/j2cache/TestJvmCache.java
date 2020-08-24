@@ -11,8 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.hazelcast.nio.serialization.Data;
-
 public class TestJvmCache {
 
 	public TestJvmCache() {
@@ -27,10 +25,10 @@ public class TestJvmCache {
 	}
 
 	@Test
-	public void test() {
-		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("jvmCache", String.class, DataClass.class);
+	public void testWriteAndRead() {
+		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("jvmCache-testWriteAndRead", String.class, DataClass.class);
 		
-		Integer cnt = 1000000;
+		Integer cnt = 5000000;
 		System.out.println("开始测试写入缓存" + cache.getName());
 		long begin = System.currentTimeMillis();
 		for (int i = 0; i < cnt; i++) {
@@ -58,7 +56,7 @@ public class TestJvmCache {
 	
 	@Test
 	public void testExprie() {
-		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache", String.class, DataClass.class, 0, 2000l);
+		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache-testExprie", String.class, DataClass.class, 0, 2000l);
 		cache.put("a", "bb");
 		
 		System.out.println("try get cache:" + cache.get("a"));
@@ -84,7 +82,7 @@ public class TestJvmCache {
 	
 	@Test
 	public void testDataClassNormal() {
-		ICache<String, DataClassNormal> cache = CacheManager.getOrCreateCache("jvmCache", String.class, DataClassNormal.class, 0, 2000l);
+		ICache<String, DataClassNormal> cache = CacheManager.getOrCreateCache("jvmCache-testDataClassNormal", String.class, DataClassNormal.class, 0, 2000l);
 		
 		DataClassNormal data = new DataClassNormal();
 		data.setName("a");
@@ -127,9 +125,9 @@ public class TestJvmCache {
 	            	Integer randKey = rand.nextInt(10);
 	            	DataClassNormal data = cache.get(randKey);
 	            	if (data == null) {
-	                	System.err.println(String.format("get cache[key=%d] is null", randKey));
+	                	System.err.println(String.format("get cache[key=%d, value=null]", randKey));
 	            	} else {
-	            		System.out.println(String.format("get cache[key=%d] is %s", randKey, data.getName()));
+	            		System.out.println(String.format("get cache[key=%d, value=%s]", randKey, data.getName()));
 	            	}
 	            	
 	            	try {
@@ -176,7 +174,7 @@ public class TestJvmCache {
         for(;;) {
             try {
     			Thread.sleep(1000);
-    			if (cnt == 60) {
+    			if (cnt == 20) {
     				return;
     			}
     			cnt++;

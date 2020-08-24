@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -24,13 +23,13 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	private long maxCacheSize;
 	private long maxLifetime;
 	private int cacheSize = 0;
-	private LinkedList<KeyLinkNode<K>> keyLinklist;
+	private LinkedList<K> keyLinklist;
 
 	public DefaultCache(String name, long maxSize, long maxLifetime) {
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-		keyLinklist = new LinkedList<KeyLinkNode<K>>();
+		keyLinklist = new LinkedList<>();
 		map = new ConcurrentHashMap<K, CacheWapper<V>>(103);		
 	}
 	
@@ -95,10 +94,9 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 		DefaultCache.CacheWapper<V> cacheObject = new DefaultCache.CacheWapper<>(value, objectSize);
 		map.put(key, cacheObject);
 		//将Key放于链表中
-		KeyLinkNode<K> node = new KeyLinkNode<K>();
-		node.timestamp = System.currentTimeMillis();
-		node.key = key;
-		keyLinklist.addFirst(node);
+		LinkedListNode<K> ageNode = keyLinklist.addFirst(key);
+		ageNode.timestamp = System.currentTimeMillis();
+		cacheObject.ageListNode = ageNode;
 		return returnValue;
 	}
 
@@ -111,6 +109,8 @@ public class DefaultCache<K, V> implements ICache<K, V> {
         }
         // remove from the hash map
         map.remove(key);
+        cacheObject.ageListNode.remove();
+        cacheObject.ageListNode = null;
         // removed the object, so subtract its size from the total.
         cacheSize -= cacheObject.size;
         return cacheObject.object;
@@ -132,7 +132,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 		}
 		
 		keyLinklist.clear();
-		keyLinklist = new LinkedList<DefaultCache.KeyLinkNode<K>>();
+		keyLinklist = new LinkedList<>();
 		cacheSize = 0;
 	}
 
@@ -325,13 +325,12 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	/**
 	 * 清理过期缓存
 	 */
-	protected void clearExpireCache() {
-		if (maxLifetime <=0 ) {
+	protected synchronized void clearExpireCache() {
+		if (maxLifetime <=0) {
 			return;
 		}
 		
-		
-		KeyLinkNode<K> node = keyLinklist.isEmpty() ? null : keyLinklist.getLast();
+		LinkedListNode<K> node = keyLinklist.getLast();
 		if (node == null) {
 			return;
 		}
@@ -339,10 +338,9 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 		long expireTime = System.currentTimeMillis() - maxLifetime;
 		while (expireTime > node.timestamp) {
         	// Remove the object
-        	remove(node.key);
-        	keyLinklist.remove(node);
+        	remove(node.object);
         	
-        	node = keyLinklist.isEmpty() ? null : keyLinklist.getLast();
+        	node = keyLinklist.getLast();
             if (node == null) {
                 return;
             }
@@ -364,21 +362,16 @@ public class DefaultCache<K, V> implements ICache<K, V> {
          */
         public int size;		
 		private long createTime;
+        /**
+         * A reference to the node in the age order list. We keep the reference
+         * here to avoid linear scans of the list. The reference is used if the
+         * object has to be deleted from the list.
+         */		
+		public LinkedListNode<?> ageListNode;
 		
         public CacheWapper(V object, int size) {
             this.object = object;
             this.size = size;
         }
-	}
-	
-	/**
-	 * 缓存中key的链表，用于快速检索
-	 * @author xiexb
-	 *
-	 * @param <E>
-	 */
-	private static class KeyLinkNode<E> {
-		public long timestamp;
-		public E key;
 	}
 }
