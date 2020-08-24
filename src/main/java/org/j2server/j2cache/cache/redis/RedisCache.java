@@ -36,6 +36,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	    if (StringUtils.isNotEmpty(PropsUtils.getRedisPassword())) {
 	    	this.jedis.auth(PropsUtils.getRedisPassword());
 	    }
+	    setExpire();
 	}
 	
 	/**
@@ -88,7 +89,6 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	@Override
 	public V put(K key, V value) {
 		jedis.hset(name, JSON.toJSONString(key), JSON.toJSONString(value));
-		setExpire();
 		return value;
 	}
 	
@@ -110,8 +110,6 @@ public class RedisCache<K, V> implements ICache<K, V> {
 			for (java.util.Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {  
 				jedis.hset(name, JSON.toJSONString(entry.getKey()), JSON.toJSONString(entry.getValue()));
 			}
-			
-			setExpire();
 		}
 		 
 	}

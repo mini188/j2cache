@@ -330,19 +330,21 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 			return;
 		}
 		
-		long expireTime = System.currentTimeMillis() - maxLifetime;
 		
-		Iterator list = keyLinklist.iterator();	
-		while (list.hasNext()) {
-			KeyLinkNode<K> node = (KeyLinkNode<K>) list.next();
+		KeyLinkNode<K> node = keyLinklist.isEmpty() ? null : keyLinklist.getLast();
+		if (node == null) {
+			return;
+		}
+		
+		long expireTime = System.currentTimeMillis() - maxLifetime;
+		while (expireTime > node.timestamp) {
+        	// Remove the object
+        	remove(node.key);
+        	keyLinklist.remove(node);
+        	
+        	node = keyLinklist.isEmpty() ? null : keyLinklist.getLast();
             if (node == null) {
                 return;
-            }
-            
-            if (expireTime > node.timestamp) {
-            	// Remove the object
-            	remove(node.key);
-            	keyLinklist.remove(node);
             }
         }
 	}
