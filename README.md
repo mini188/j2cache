@@ -6,6 +6,7 @@
 - redis
 - iginte
 - hazelcast (add 2016-10-13)
+- guava localcache(add 2020-08-25)
 
 ## 本地环境中写入1,000,000个对象的性能数据：
 
