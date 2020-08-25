@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
-import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class CacheManager {
 	private final static Logger	logger = LoggerFactory.getLogger(CacheManager.class);
 	private static Map<String, CacheObject> caches = new ConcurrentHashMap<>();
-	private static ICacheStrategy cacheStrategy = new DefaultCacheStategy(); 
+	private static ICacheStrategy cacheStrategy; 
 	private static String cacheStrategyClass;
 	
 	
