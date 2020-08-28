@@ -63,7 +63,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	}
 
 	@Override
-	public V get(Object key) {
+	public synchronized V get(Object key) {
 		clearExpireCache();
 		
 		CacheWapper<V> wapper = map.get(key);
@@ -74,7 +74,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	}
 
 	@Override
-	public V put(K key, V value) {
+	public synchronized V put(K key, V value) {
 		V returnValue = remove(key);
 		
 		int objectSize = 1;
@@ -101,7 +101,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	}
 
 	@Override
-	public V remove(Object key) {
+	public synchronized V remove(Object key) {
 		DefaultCache.CacheWapper<V> cacheObject = map.get(key);
         // If the object is not in cache, stop trying to remove it.
         if (cacheObject == null) {
@@ -126,7 +126,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	}
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		if (map != null) {
 			map.clear();
 		}
@@ -325,7 +325,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	/**
 	 * 清理过期缓存
 	 */
-	protected synchronized void clearExpireCache() {
+	protected void clearExpireCache() {
 		if (maxLifetime <=0) {
 			return;
 		}
