@@ -44,7 +44,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public int size() {	
-		return jedis.hgetAll(name).size();
+		return jedis.hlen(name).intValue();
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	 */
 	@Override
 	public boolean isEmpty() {
-		return jedis.hgetAll(name).isEmpty();
+		return jedis.hlen(name) <= 0;
 	}
 	
 	/**
