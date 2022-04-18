@@ -26,6 +26,7 @@ public class RedisCacheStategy implements ICacheStrategy {
 	public ICache createCache(String name, Class<?> keyClass,
 			Class<?> valueCalss, long maxSize, long maxLifetime) {
 		return new RedisCache(name
+				, ""
 				, maxSize
 				, maxLifetime
 				, keyClass
