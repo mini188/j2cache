@@ -1,8 +1,8 @@
 package org.j2server.j2cache.cache.redis;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,8 +15,8 @@ import com.alibaba.fastjson.JSON;
 import redis.clients.jedis.Jedis;
 
 public class RedisCache<K, V> implements ICache<K, V> {
-	private Class<?> keyClass;
-	private Class<?> valueClass;
+	private Class<K> keyClass;
+	private Class<V> valueClass;
 	private String name;
 	private int cacheSize = 0;
 	private long maxCacheSize;
@@ -48,48 +48,6 @@ public class RedisCache<K, V> implements ICache<K, V> {
         this.valueClass = valueCalss;
         this.keyPrefix = keyPrefix;
     }
-
-	private String getCacheKey(Object key) {
-		String cacheKey = "";
-		
-		if (StringUtils.isNotEmpty(this.keyPrefix)) {
-			cacheKey += this.keyPrefix;
-		}
-		
-		if (StringUtils.isNotEmpty(cacheKey)) {
-			cacheKey += ":";
-		}
-		
-		if (StringUtils.isNotEmpty(this.name)) {
-			cacheKey += this.name;
-		}
-		
-		if (StringUtils.isNotEmpty(cacheKey)) {
-			cacheKey += ":";
-		}
-		
-		if (key instanceof String) {
-			cacheKey += ((String) key);
-		} else {
-			//为了兼容Map接口里的Object入参使用JSON序列化key
-			//JSON串的特殊字符处理掉
-			cacheKey += JSON.toJSONString(key).replaceAll("\\{", "")
-					.replaceAll("}", "")
-					.replaceAll("\"", "")
-					.replaceAll(",", "")
-					.replaceAll(":", "_")
-					.trim();
-		}
-
-		return cacheKey;
-	}
-	
-	private Integer getExpire() {
-		if (this.maxLifetime <= 0) {
-			return -1;
-		}
-		return (int) (this.maxLifetime / 1000);
-	}
 	
     /**
      * 获取map的大小
@@ -112,7 +70,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        return this.jedis.exists(getCacheKey(key));
+        return this.jedis.exists(buildCacheKey(key));
     }
 
     /**
@@ -120,43 +78,42 @@ public class RedisCache<K, V> implements ICache<K, V> {
      */
     @Override
     public boolean containsValue(Object value) {
-    	throw new RuntimeException("not support containsValue in redis cache.");
+    	throw new UnsupportedOperationException();
     }
 
     /**
-     * 根据key获取map的值
+     * 	根据key获取map的值
      */
-    @SuppressWarnings("unchecked")
 	@Override
     public V get(Object key) {
-    	String valueJson = jedis.get(getCacheKey(key)); 
+    	byte[] valueJson = jedis.get(buildCacheKey(key)); 
 		if (valueJson == null) {
 			return null;
 		}
-		return (V) JSON.parseObject(valueJson, valueClass);
+		return JSON.parseObject(valueJson, valueClass);
     }
 
     /**
-     * 根据key设置map的值
+     * 	写入K-V
      */
     @Override
     public V put(K key, V value) {
     	Integer expire = getExpire();
     	if (expire > 0) {
-    		this.jedis.setex(getCacheKey(key), expire, JSON.toJSONString(value));
+    		this.jedis.setex(buildCacheKey(key), expire, JSON.toJSONBytes(value));
     	} else {
-    		this.jedis.set(getCacheKey(key), JSON.toJSONString(value));
+    		this.jedis.set(buildCacheKey(key), JSON.toJSONBytes(value));
 		}
         return value;
     }
 
     /**
-     * 根据key移除map的值
+     * 	根据key移除值
      */
     @Override
     public V remove(Object key) {
-    	String cacheKey = getCacheKey(key);
-    	synchronized (cacheKey.intern()) {
+    	byte[] cacheKey = buildCacheKey(key);
+    	synchronized (cacheKey) {
         	V v = get(cacheKey);
             this.jedis.del(cacheKey);
             return v;
@@ -164,7 +121,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
     }
 
     /**
-     * 追加Map对象到当前Map集合中
+     * 	批量加入对象
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
@@ -176,39 +133,59 @@ public class RedisCache<K, V> implements ICache<K, V> {
     }
 
     /**
-     * 清空map里所有的值
+     * 	清空K-V
      */
     @Override
     public void clear() {
-        Set<String> keySet = getAllKesByCacheName();
-        String[] strs = Arrays.asList(keySet.toArray()).toArray(new String[0]);
-        if (null != keySet && keySet.size() > 0) {
-            this.jedis.del(strs);
-        }
-    }
-
-    @Override
-    public Set<K> keySet() {
-    	throw new UnsupportedOperationException();
+    	Set<byte[]> keys = getAllKesByCacheName();
+    	int batchSize = keys.size() > 1000 ? 1000: keys.size();
+		byte[][] dels = new byte[batchSize][];
+		int i = 0;
+    	for (byte[] k: keys) {
+    		if (i >= batchSize) {
+        		jedis.unlink(dels);
+        		i = 0;
+    		}
+    		
+    		dels[i] = k;
+    		i++;
+    	}
+    	
+    	if (i > 0) {
+    		jedis.unlink(dels);
+    	}
     }
 
     /**
-     * 获取map里所有的key的值
+     *	获取全部key，慎重使用！
      */
-    @SuppressWarnings("unchecked")
+    @Override
+    public Set<K> keySet() {
+    	Set<K> result = new HashSet<K>();
+        Set<byte[]> keys = getAllKesByCacheName();
+        for (byte[] key : keys) {
+        	K realKey = restoreRealKey(key);
+        	result.add(realKey);
+        }
+        return result;
+    }
+
+    /**
+     *	 获取所有的key的值，慎重使用！
+     */
 	@Override
     public synchronized Collection<V> values() {
         Collection<V> list = new ArrayList<V>();
-        Set<String> keys = getAllKesByCacheName();
-        for (String key : keys) {
-        	String val = this.jedis.get(key);
-            list.add((V) JSON.parseObject(val, valueClass));
+        Set<byte[]> keys = getAllKesByCacheName();
+        for (byte[] key : keys) {
+        	byte[] val = this.jedis.get(key);
+            list.add(JSON.parseObject(val, valueClass));
         }
         return list;
     }
 
-	private Set<String> getAllKesByCacheName() {
-		return this.jedis.keys(String.format("%s:*", name));
+	private Set<byte[]> getAllKesByCacheName() {
+		return this.jedis.keys(String.format("%s:*", name).getBytes());
 	}
 
     public Set<Map.Entry<K, V>> entrySet() {
@@ -249,4 +226,61 @@ public class RedisCache<K, V> implements ICache<K, V> {
     public int getCacheSize() {
         return cacheSize;
     }
+
+	private byte[] buildCacheKey(Object key) {
+		String cacheKey = "";
+		
+		if (StringUtils.isNotEmpty(this.keyPrefix)) {
+			cacheKey += this.keyPrefix;
+		}
+		
+		if (StringUtils.isNotEmpty(cacheKey)) {
+			cacheKey += ":";
+		}
+		
+		if (StringUtils.isNotEmpty(this.name)) {
+			cacheKey += this.name;
+		}
+		
+		if (StringUtils.isNotEmpty(cacheKey)) {
+			cacheKey += ":";
+		}
+		
+		cacheKey += JSON.toJSONString(key);
+		return cacheKey.getBytes();
+	}
+	
+	private K restoreRealKey(byte[] cacheKey) {
+		if (cacheKey == null || cacheKey.length <= 0) {
+			return null;
+		}
+		
+		String cacheKeyStr = new String(cacheKey);
+		
+		String cachePrefix = "";
+		if (StringUtils.isNotEmpty(this.keyPrefix)) {
+			cachePrefix += this.keyPrefix;
+		}
+		
+		if (StringUtils.isNotEmpty(cachePrefix)) {
+			cachePrefix += ":";
+		}
+		
+		if (StringUtils.isNotEmpty(this.name)) {
+			cachePrefix += this.name;
+		}
+		
+		if (StringUtils.isNotEmpty(cachePrefix)) {
+			cachePrefix += ":";
+		}
+		
+		return JSON.parseObject(cacheKeyStr.replace(cachePrefix, ""), keyClass);
+	}
+	
+	private Integer getExpire() {
+		if (this.maxLifetime <= 0) {
+			return -1;
+		}
+		return (int) (this.maxLifetime / 1000);
+	}
 }
