@@ -1,5 +1,6 @@
 package org.j2server.j2cache.cache.jvm;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -147,15 +148,16 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	@Override
 	public Collection<V> values() {
 		clearExpireCache();
-		return new DefaultCache.CacheObjectCollection(map.values());
+		return new CacheObjectCollection<V>(map.values());
 	}
+
     /**
      * Wraps a cached object collection to return a view of its inner objects
      */
-    private final class CacheObjectCollection<V> implements Collection<V> {
-        private Collection<DefaultCache.CacheWapper<V>> cachedObjects;
+    private final class CacheObjectCollection<T> extends AbstractCollection<T> {
+        private Collection<CacheWapper<T>> cachedObjects;
 
-        private CacheObjectCollection(Collection<DefaultCache.CacheWapper<V>> cachedObjects) {
+        private CacheObjectCollection(Collection<CacheWapper<T>> cachedObjects) {
             this.cachedObjects = new ArrayList<>(cachedObjects);
         }
 
@@ -171,7 +173,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 
         @Override
         public boolean contains(Object o) {
-            Iterator<V> it = iterator();
+            Iterator<T> it = iterator();
             while (it.hasNext()) {
                 if (it.next().equals(o)) {
                     return true;
@@ -181,9 +183,9 @@ public class DefaultCache<K, V> implements ICache<K, V> {
         }
 
         @Override
-        public Iterator<V> iterator() {
-            return new Iterator<V>() {
-                private final Iterator<DefaultCache.CacheWapper<V>> it = cachedObjects.iterator();
+        public Iterator<T> iterator() {
+            return new Iterator<T>() {
+                private final Iterator<CacheWapper<T>> it = cachedObjects.iterator();
 
                 @Override
                 public boolean hasNext() {
@@ -191,16 +193,15 @@ public class DefaultCache<K, V> implements ICache<K, V> {
                 }
 
                 @Override
-                public V next() {
-                    if(it.hasNext()) {
-                        DefaultCache.CacheWapper<V> object = it.next();
-                        if(object == null) {
+                public T next() {
+                    if (it.hasNext()) {
+                        CacheWapper<T> object = it.next();
+                        if (object == null) {
                             return null;
                         } else {
                             return object.object;
                         }
-                    }
-                    else {
+                    } else {
                         throw new NoSuchElementException();
                     }
                 }
@@ -211,70 +212,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
                 }
             };
         }
-
-        @Override
-        public Object[] toArray() {
-            Object[] array = new Object[size()];
-            Iterator<?> it = iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                array[i] = it.next();
-            }
-            return array;
-        }
-
-        @Override
-        public <V>V[] toArray(V[] a) {
-            Iterator<V> it = (Iterator<V>) iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                a[i++] = it.next();
-            }
-            return a;
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> c) {
-            Iterator<?> it = c.iterator();
-            while(it.hasNext()) {
-                if(!contains(it.next())) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public boolean add(V o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends V> coll) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> coll) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> coll) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
     }
-
 
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {

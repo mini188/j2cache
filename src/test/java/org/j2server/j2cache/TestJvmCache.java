@@ -2,6 +2,7 @@ package org.j2server.j2cache;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.Random;
 
 import org.j2server.j2cache.cache.CacheManager;
@@ -104,8 +105,26 @@ public class TestJvmCache {
 	}
 	
 	@Test
+	public void testValues() {
+		ICache<Object, String> cache = CacheManager.getOrCreateCache("jvmCache-testCacheValues", Object.class, String.class);
+		int size = 5;
+		for (int i = 0; i < size; i++) {
+			cache.put("testKey" + i, "testValue" + i);
+		}
+
+		try {
+			Collection<String> values = cache.values();
+			Assert.assertEquals(size, values == null ? 0 : values.size());
+			int randomIdx = new Random().nextInt(size);
+			Assert.assertTrue(values.contains("testValue"+randomIdx));
+		} finally {
+			CacheManager.destroyCache(cache.getName());
+		}
+	}
+	
+	@Test
 	public void testThreadSafe() {
-		ICache<Integer, DataClassNormal> cache = CacheManager.getOrCreateCache("testThreadSafe", Integer.class, DataClassNormal.class, 0, 5000l);
+		ICache<Integer, DataClassNormal> cache = CacheManager.getOrCreateCache("jvmCache-testThreadSafe", Integer.class, DataClassNormal.class, 0, 5000l);
 		
 		System.out.println("put caches.");
 		for(int i=0;i< 10; i++) {
