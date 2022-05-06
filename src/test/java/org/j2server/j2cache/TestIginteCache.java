@@ -6,6 +6,7 @@ import org.j2server.j2cache.cache.iginte.IgniteCacheStategy;
 import org.j2server.j2cache.entites.DataClass;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,6 +47,7 @@ public class TestIginteCache {
         begin = System.currentTimeMillis();
 		for (int i = 0; i < cnt; i++) {
 			DataClass dc = cache.get(Integer.toString(i));
+			Assert.assertNotNull(dc);
 		}
 		end = System.currentTimeMillis();		
 		System.out.println("读取总共耗时：" + (end - begin));
