@@ -1,6 +1,7 @@
 package org.j2server.j2cache.utils;
 
 import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
+import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
 
 
 
@@ -15,6 +16,7 @@ public class PropsUtils {
 
 	private static Integer redisPort = 6379;
 	private static String redisPwd = "";
+	private static String jedisType = JedisWapperFactory.JEDIS_POOL;
 
 	/**
 	 * 获取获取的最大长度
@@ -58,5 +60,13 @@ public class PropsUtils {
 
 	public static void setRedisPort(Integer redisPort) {
 		PropsUtils.redisPort = redisPort;
+	}
+
+	public static String getJedisType() {
+		return jedisType;
+	}
+
+	public static void setJedisType(String jedisType) {
+		PropsUtils.jedisType = jedisType;
 	}
 }

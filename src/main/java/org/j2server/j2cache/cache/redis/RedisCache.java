@@ -8,11 +8,10 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.cache.ICache;
-import org.j2server.j2cache.utils.PropsUtils;
+import org.j2server.j2cache.cache.redis.jedis.IJedisWapper;
+import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
 
 import com.alibaba.fastjson.JSON;
-
-import redis.clients.jedis.Jedis;
 
 public class RedisCache<K, V> implements ICache<K, V> {
 	private Class<K> keyClass;
@@ -23,7 +22,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	private long maxLifetime;
 	private String keyPrefix;
 	
-	private Jedis jedis;
+	private IJedisWapper jedis;
 
     /**
      * 
@@ -40,10 +39,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
         this.name = name;
         this.maxCacheSize = maxSize;
         this.maxLifetime = maxLifetime;
-        this.jedis = new Jedis(PropsUtils.getRedisHost(), PropsUtils.getRedisPort());
-	    if (StringUtils.isNotEmpty(PropsUtils.getRedisPassword())) {
-	    	this.jedis.auth(PropsUtils.getRedisPassword());
-	    }
+    	this.jedis = JedisWapperFactory.createJedisWapper();
         this.keyClass = keyClass;
         this.valueClass = valueCalss;
         this.keyPrefix = keyPrefix;
