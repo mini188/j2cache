@@ -2,8 +2,6 @@ package org.j2server.j2cache.cache;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.commons.lang.StringUtils;
@@ -11,13 +9,11 @@ import org.j2server.j2cache.utils.PropsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("rawtypes")
 public class CacheManager {
 	private final static Logger	logger = LoggerFactory.getLogger(CacheManager.class);
-	private static Map<String, CacheObject> caches = new ConcurrentHashMap<>();
+	private static CacheObjectHolder caches = new CacheObjectHolder();
 	private static ICacheStrategy cacheStrategy; 
 	private static String cacheStrategyClass;
-	
 	
 	private static void InitCacheStrategy() {
 		String cacheStrategyClassSetting = PropsUtils.getCacheStrategyClass();
@@ -47,16 +43,16 @@ public class CacheManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
-		T cache = (T) caches.get(cacheName);
-	    if (cache != null) {
-	        return cache;
+		CacheObject cacheObj = caches.get(cacheName);
+	    if (cacheObj != null) {
+	        return (T) cacheObj.getCache();
 	    }
         
 	    if (cacheStrategy == null) {
 	    	InitCacheStrategy();
 	    }
 	    
-	    cache = (T) cacheStrategy.createCache(cacheName, keyClass, valueCalss, maxSize, maxLifetime);
+	    T cache = (T) cacheStrategy.createCache(cacheName, keyClass, valueCalss, maxSize, maxLifetime);
 	    caches.put(cacheName, new CacheObject(cacheStrategy, cache));
 		return cache;
 	}
@@ -114,41 +110,10 @@ public class CacheManager {
 	
 	public static ICache<?,?>[] getAllCaches() {
 		List<ICache<?,?>> values = new ArrayList<ICache<?,?>>();
-		for (CacheObject item: caches.values()) {
+		for (CacheObject item: caches.getAllCaches()) {
 			values.add(item.getCache());
 		}
 			
 		return values.toArray(new ICache<?,?>[values.size()]);
-	}
-	
-	/**
-	 * 缓存管理对象，用于存放缓存及缓存策略对象
-	 * @author xiexb
-	 *
-	 */
-	static class CacheObject {
-		private ICache cache;
-		private ICacheStrategy strategy;
-		
-		CacheObject(ICacheStrategy strategy, ICache cache) {
-			this.setStrategy(strategy);
-			this.setCache(cache);
-		}
-
-		public ICache getCache() {
-			return cache;
-		}
-
-		public void setCache(ICache cache) {
-			this.cache = cache;
-		}
-
-		public ICacheStrategy getStrategy() {
-			return strategy;
-		}
-
-		public void setStrategy(ICacheStrategy strategy) {
-			this.strategy = strategy;
-		}
 	}
 }

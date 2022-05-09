@@ -1,5 +1,6 @@
 package org.j2server.j2cache.utils;
 
+import org.j2server.j2cache.cache.DefaultCacheObjectManager;
 import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
 import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
 
@@ -12,6 +13,7 @@ import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
  */
 public class PropsUtils {
 	private static String cacheStrategyClass = DefaultCacheStategy.class.getName();
+	private static String cacheObjectManagerClass = DefaultCacheObjectManager.class.getName();
 	private static String redisHost= "127.0.0.1";
 
 	private static Integer redisPort = 6379;
@@ -68,5 +70,13 @@ public class PropsUtils {
 
 	public static void setJedisType(String jedisType) {
 		PropsUtils.jedisType = jedisType;
+	}
+
+	public static String getCacheObjectManagerClass() {
+		return cacheObjectManagerClass;
+	}
+
+	public static void setCacheObjectManagerClass(String cacheObjectManagerClass) {
+		PropsUtils.cacheObjectManagerClass = cacheObjectManagerClass;
 	}
 }
