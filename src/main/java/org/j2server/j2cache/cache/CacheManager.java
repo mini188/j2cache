@@ -13,15 +13,13 @@ public class CacheManager {
 	private final static Logger	logger = LoggerFactory.getLogger(CacheManager.class);
 	private static CacheObjectHolder caches = new CacheObjectHolder();
 	private static ICacheStrategy cacheStrategy; 
-	private static String cacheStrategyClass;
 	
 	private static void InitCacheStrategy() {
 		String cacheStrategyClassSetting = PropsUtils.getCacheStrategyClass();
 		//加载缓存策略
-		if (StringUtils.isNotEmpty(cacheStrategyClassSetting) &&  cacheStrategyClassSetting.equals(cacheStrategyClass) == false) {
-			cacheStrategyClass = cacheStrategyClassSetting;
+		if (StringUtils.isNotEmpty(cacheStrategyClassSetting)) {
 			try {
-				cacheStrategy = (ICacheStrategy) Class.forName(cacheStrategyClass).newInstance();
+				cacheStrategy = (ICacheStrategy) Class.forName(cacheStrategyClassSetting).newInstance();
 			} catch (InstantiationException | IllegalAccessException
 					| ClassNotFoundException e) {
 				logger.error("ChanageCache error", e);
