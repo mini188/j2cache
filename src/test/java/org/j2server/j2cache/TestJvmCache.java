@@ -1,7 +1,6 @@
 package org.j2server.j2cache;
 
-import static org.junit.Assert.assertTrue;
-
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
@@ -13,6 +12,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.alibaba.fastjson.JSON;
 
 public class TestJvmCache {
 
@@ -30,53 +31,69 @@ public class TestJvmCache {
 	@Test
 	public void testWriteAndRead() {
 		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("jvmCache-testWriteAndRead", String.class, DataClass.class);
-		
-		Integer cnt = 5000000;
-		System.out.println("开始测试写入缓存" + cache.getName());
-		long begin = System.currentTimeMillis();
-		for (int i = 0; i < cnt; i++) {
-			DataClass dc = new DataClass();
-			dc.setName(Integer.toString(i));
-			dc.setValue(i);
-			dc.setStrValue("asdfadsfasfda");
-			cache.put(Integer.toString(i), dc);
+		try {
+			Integer cnt = 10010;
+			System.out.println("开始缓存写入测试" + cache.getName());
+			long begin = System.currentTimeMillis();
+			long size = 0l;
+			char[] chars = new char[1024];
+			Arrays.fill(chars, 'x');
+			String body = new String(chars);
+			for (int i = 0; i < cnt; i++) {
+				DataClass dc = new DataClass();
+				dc.setName(Integer.toString(i));
+				dc.setValue(i);
+				dc.setStrValue(body);
+				cache.put(Integer.toString(i), dc);
+				size += JSON.toJSONString(dc).length();
+			}
+			long end = System.currentTimeMillis();
+			double diff = end - begin;
+			System.out.println("总共耗时：" + diff);
+			System.out.println(String.format("每毫秒写入:%.2f条。", cnt / diff));
+			System.out.println(String.format("每秒写入:%.2f条。", cnt / diff * 1000));
+			System.out.println(String.format("每秒写入：%.2f mb", size / 1024 / 1024 / diff * 1000));
+
+			System.out.println("开始缓存读取测试" + cache.getName());
+			begin = System.currentTimeMillis();
+			for (int i = 0; i < cnt; i++) {
+				size += JSON.toJSONString(cache.get(Integer.toString(i))).length();
+			}
+			end = System.currentTimeMillis();
+			diff = end - begin;
+			System.out.println("读取总共耗时：" + diff);
+			System.out.println(String.format("每毫秒读取:%.2f条。", cnt / diff));
+			System.out.println(String.format("每秒读取:%.2f条。", cnt / diff * 1000));
+			System.out.println(String.format("每秒读取：%.2f mb", size / 1024 / 1024 / diff * 1000));
+		} finally {
+			CacheManager.destroyCache(cache.getName());
 		}
-		long end = System.currentTimeMillis();		
-		System.out.println("总共耗时：" + (end - begin));
-		System.out.println("每毫秒写入:"+cnt/(end - begin)+"条。");  
-        System.out.println("每秒写入:"+(cnt/(end - begin))*1000+"条。"); 
-        
-        System.out.println("开始测试读取缓存" + cache.getName());
-        begin = System.currentTimeMillis();
-		for (int i = 0; i < cnt; i++) {
-			cache.get(Integer.toString(i));
-		}
-		end = System.currentTimeMillis();		
-		System.out.println("读取总共耗时：" + (end - begin));
-		System.out.println("每毫秒读取:"+cnt/(end - begin)+"条。");  
-        System.out.println("每秒读取:"+(cnt/(end - begin))*1000+"条。");       
 	}
 	
 	@Test
 	public void testExprie() {
-		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache-testExprie", String.class, DataClass.class, 0, 2000l);
+		long expire = 3000L;
+		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache-testExprie", String.class, DataClass.class, 0, expire);
+		String key = "testKey";
+		String actual = "testValue";
+		cache.put(key, actual);
+		try {
+			long waitTime = 0;
+			for (int i = 0; i < 5; i++) {
+				waitTime += 1000;
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 
-		cache.put("a", "bb");		
-		assertTrue("测试读取缓存，读取的缓存值并不是预期值[bb]。", "bb".equals(cache.get("a")));
-		
-		try {
-			Thread.sleep(1900);
-		} catch (InterruptedException e) {
+				String v = cache.get(key);
+				Assert.assertEquals(String.format("get expire cache after [%d] ms", waitTime),
+						waitTime >= expire ? null : actual, v);
+			}
+		} finally {
+			CacheManager.destroyCache(cache.getName());
 		}
-		assertTrue("测试缓存有效期，读取到的缓存值并不是预期值[bb]。", "bb".equals(cache.get("a")));
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
-		assertTrue("测试读取过期缓存，读取的缓存值并不是预期的[null]。", cache.get("a") == null);
-		
-		cache.put("a", "new value");
-		assertTrue("测试重新写入过期缓存，读取的缓存值不是预期数据[bb].", "new value".equals(cache.get("a")));
 	}
 	
 	@Test
@@ -122,7 +139,7 @@ public class TestJvmCache {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void testThreadSafe() {
 		ICache<Integer, DataClassNormal> cache = CacheManager.getOrCreateCache("jvmCache-testThreadSafe", Integer.class, DataClassNormal.class, 0, 5000l);
 		
@@ -199,5 +216,17 @@ public class TestJvmCache {
     			e.printStackTrace();
     		}        	
         }
+	}
+	
+	@Test
+	public void testClear() {
+		ICache<String, String> cache = CacheManager.getOrCreateCache("jvmCache-cacheClear", String.class, String.class);
+		Integer cnt = 100;
+		for (int i = 0; i < cnt; i++) {
+			cache.put(Integer.toString(i), "value"+i);
+		}
+		
+		CacheManager.destroyCache(cache.getName());
+		Assert.assertTrue(0 == cache.size());
 	}
 }

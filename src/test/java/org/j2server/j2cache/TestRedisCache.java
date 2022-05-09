@@ -188,5 +188,6 @@ public class TestRedisCache {
 		}
 		
 		CacheManager.destroyCache(cache.getName());
+		Assert.assertTrue(0 == cache.size());
 	}
 }
