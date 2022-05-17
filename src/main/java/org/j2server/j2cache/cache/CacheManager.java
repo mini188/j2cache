@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.NullArgumentException;
-import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,22 +11,16 @@ import org.slf4j.LoggerFactory;
 public class CacheManager {
 	private final static Logger	logger = LoggerFactory.getLogger(CacheManager.class);
 	private static CacheObjectHolder caches = new CacheObjectHolder();
-	private static ICacheStrategy cacheStrategy; 
-	
-	private static void InitCacheStrategy() {
-		String cacheStrategyClassSetting = PropsUtils.getCacheStrategyClass();
-		//加载缓存策略
-		if (StringUtils.isNotEmpty(cacheStrategyClassSetting)) {
-			try {
-				cacheStrategy = (ICacheStrategy) Class.forName(cacheStrategyClassSetting).newInstance();
-			} catch (InstantiationException | IllegalAccessException
-					| ClassNotFoundException e) {
-				logger.error("ChanageCache error", e);
-			}
-		}
-	}	
 
-	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss) {
+	/**
+	 * 获取或创建缓存
+	 * @param cacheName  缓存名
+	 * @param keyClass   键的类型
+	 * @param valueCalss 值的类型
+	 * @return 缓存对象
+	 * @throws Exception 如果provider为空时会抛出异常
+	 */
+	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss) {
 		return getOrCreateCache(cacheName, keyClass, valueCalss, 0l, 0l);
 	}
 	
@@ -39,20 +32,13 @@ public class CacheManager {
 	 * @return 缓存对象
 	 * @throws Exception 如果provider为空时会抛出异常
 	 */
-	@SuppressWarnings("unchecked")
-	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
-		CacheObject cacheObj = caches.get(cacheName);
-	    if (cacheObj != null) {
-	        return (T) cacheObj.getCache();
-	    }
-        
-	    if (cacheStrategy == null) {
-	    	InitCacheStrategy();
-	    }
-	    
-	    T cache = (T) cacheStrategy.createCache(cacheName, keyClass, valueCalss, maxSize, maxLifetime);
-	    caches.put(cacheName, new CacheObject(cacheStrategy, cache));
-		return cache;
+	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
+		try {
+			return getOrCreateCache(PropsUtils.getCacheStrategyClass(), cacheName, keyClass, valueCalss, maxSize, maxLifetime);
+		} catch (Exception e) {
+			logger.error("create cache error.", e);
+			return null;
+		}
 	}
 	
 	/**
@@ -64,7 +50,7 @@ public class CacheManager {
 	 * @return 缓存对象
 	 * @throws Exception 如果stategy为空时会抛出异常
 	 */
-	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(
+	public static <T extends ICache<?,?>> T  getOrCreateCache(
 			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss) throws Exception {
 		return getOrCreateCache(stategy, cacheName, keyClass, valueCalss, 0l, 0l);
 	}
@@ -81,7 +67,7 @@ public class CacheManager {
 	 * @throws Exception 如果stategy为空时会抛出异常
 	 */
 	@SuppressWarnings("unchecked")
-	public static synchronized <T extends ICache<?,?>> T  getOrCreateCache(
+	public static <T extends ICache<?,?>> T  getOrCreateCache(
 			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss, 
 			long maxSize, long maxLifetime) throws Exception {
 		if (stategy == null) {
@@ -99,7 +85,7 @@ public class CacheManager {
 	}
 
 
-	public static synchronized void destroyCache(String cacheName) {
+	public static void destroyCache(String cacheName) {
 		CacheObject cacheObj = caches.remove(cacheName);
 		if (cacheObj != null) {
 			cacheObj.getStrategy().destroyCache(cacheObj.getCache());
