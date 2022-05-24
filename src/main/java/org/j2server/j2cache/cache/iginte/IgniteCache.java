@@ -1,9 +1,6 @@
 package org.j2server.j2cache.cache.iginte;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +26,9 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 		this.maxLifetime = maxLifetime;
 		CacheConfiguration<K, V> config = new CacheConfiguration<K, V>();
 		config.setName(name);
-		config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.MILLISECONDS, maxLifetime)));
+		if (maxLifetime > 0) {
+			config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.MILLISECONDS, maxLifetime)));
+		}
 	    map = IgniteInstance.getInstance().getIgnite().getOrCreateCache(config);
 	}
 
@@ -83,36 +82,17 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 
 	@Override
 	public Set<K> keySet() {
-		Set<K> keySet = new HashSet<K>();
-		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
-		while (it.hasNext()) {
-			keySet.add(it.next().getKey());
-		}
-		return keySet;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Collection<V> values() {
-		Collection<V> vals = new ArrayList<V>();
-		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
-		while (it.hasNext()) {
-			vals.add(it.next().getValue());
-		}
-		return vals;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Set<Entry<K, V>> entrySet() {
-		Set<Entry<K, V>> entrySet = new HashSet<Entry<K,V>>();
-		Iterator<javax.cache.Cache.Entry<K, V>> it = map.iterator();
-		while (it.hasNext()) {
-			javax.cache.Cache.Entry<K, V> e =it.next();
-			EntryWapper<K, V> wapper = new EntryWapper<K, V>();
-			wapper.setKey(e.getKey());
-			wapper.setValue(e.getValue());
-			entrySet.add(wapper);
-		}
-		return entrySet;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

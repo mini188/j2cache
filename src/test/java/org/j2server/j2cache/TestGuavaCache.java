@@ -85,6 +85,27 @@ public class TestGuavaCache {
 		}
 	}
 	
+	@Test
+	public void testCacheObject() {
+		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("guavaCacheObject", String.class, DataClass.class);
+		try {
+			String key = "objectKey";
+			DataClass obj = new DataClass();
+			obj.setName("data-1");
+			obj.setStrValue("test str");
+			obj.setValue(100l);
+			cache.put(key, obj);
+			
+			DataClass cacheObj = cache.get(key);
+			Assert.assertNotNull(cacheObj);
+			Assert.assertTrue(obj.getName().equals(cacheObj.getName()));
+			Assert.assertTrue(obj.getStrValue().equals(cacheObj.getStrValue()));
+			Assert.assertTrue(obj.getValue() == cacheObj.getValue());
+		} finally {
+			CacheManager.destroyCache(cache.getName());
+		}
+	}
+	
 	//@Test
 	public void testThreadSafe() {
 		ICache<Integer, DataClassNormal> cache = CacheManager.getOrCreateCache("guavaCache-testThreadSafe", Integer.class, DataClassNormal.class, 0, 5000l);

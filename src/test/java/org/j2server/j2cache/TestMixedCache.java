@@ -3,7 +3,6 @@ package org.j2server.j2cache;
 import org.j2server.j2cache.cache.CacheManager;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.cache.guava.GuavaCacheStategy;
-import org.j2server.j2cache.cache.jvm.DefaultCacheStategy;
 import org.j2server.j2cache.cache.redis.RedisCacheStategy;
 import org.j2server.j2cache.entites.DataClass;
 import org.j2server.j2cache.utils.PropsUtils;

@@ -19,7 +19,8 @@ public class HazelcastCache<K, V> implements ICache<K, V>{
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-		map = HazelcastLocal.getInstance().getHazelcast().getMap(name);
+		int timeToLiveSeconds = (int) (this.maxLifetime / 1000);
+		map = HazelcastLocal.getInstance().getHazelcast(name, timeToLiveSeconds).getMap(name);
 	}
 	
 	@Override
