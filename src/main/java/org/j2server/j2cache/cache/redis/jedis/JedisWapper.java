@@ -49,6 +49,10 @@ public class JedisWapper implements IJedisWapper{
 		}
 	}
 	
+	public JedisWapper(Set<HostAndPort> hostAndPorts, String masterName) {
+		this(hostAndPorts, null, masterName);
+	}
+	
 	public JedisWapper(Set<HostAndPort> hostAndPorts, String pwd, String masterName) {
 		Set<String> sentinels = new HashSet<String>();
 		for (HostAndPort hap: hostAndPorts) {
@@ -57,7 +61,7 @@ public class JedisWapper implements IJedisWapper{
 		if (StringUtils.isNotEmpty(pwd)) {
 			pool = new JedisSentinelPool(masterName, sentinels, pwd);
 		} else {
-			pool = new JedisSentinelPool(masterName,sentinels);
+			pool = new JedisSentinelPool(masterName, sentinels);
 		}
 	}
 	
@@ -136,7 +140,6 @@ public class JedisWapper implements IJedisWapper{
     public Jedis getJedis() {
         return pool.getResource();
     }
-
 
     public void closeResource(Jedis jedis) {
         if (jedis != null) {

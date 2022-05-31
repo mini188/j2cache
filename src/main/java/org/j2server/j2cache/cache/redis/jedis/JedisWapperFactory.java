@@ -23,6 +23,9 @@ public class JedisWapperFactory {
 		case JedisWapperFactory.JEDIS_CLUSTER:
 			wapper = createJedisClustor();
 			break;
+		case JedisWapperFactory.JEDIS_SENTINEL_POOL:
+			wapper = createJedisSentinelPool();
+			break;
 		default:
 			wapper = createJedisPool();
 			break;
@@ -45,6 +48,15 @@ public class JedisWapperFactory {
 	    } else {
 	    	return new JedisClusterWapper(getHostAndPorts(PropsUtils.getRedisHost()));
 	    }
+	}
+	
+	private static IJedisWapper createJedisSentinelPool() {
+		Set<HostAndPort> hAps = getHostAndPorts(PropsUtils.getRedisHost());
+        if (StringUtils.isNotEmpty(PropsUtils.getRedisPassword())) {
+        	return new JedisWapper(hAps, PropsUtils.getRedisPassword(), PropsUtils.getRedisMasterName());
+        } else {
+        	return new JedisWapper(hAps, PropsUtils.getRedisMasterName());
+        }
 	}
 	
 	private static Set<HostAndPort> getHostAndPorts(String hostAndPorts) {

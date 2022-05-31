@@ -14,11 +14,29 @@ import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
 public class PropsUtils {
 	private static String cacheStrategyClass = DefaultCacheStategy.class.getName();
 	private static String cacheObjectManagerClass = DefaultCacheObjectManager.class.getName();
+	
 	private static String redisHost= "127.0.0.1";
-
 	private static Integer redisPort = 6379;
 	private static String redisPwd = "";
+	private static String redisMasterName = "";
 	private static String jedisType = JedisWapperFactory.JEDIS_POOL;
+
+	
+	public static String getRedisPwd() {
+		return redisPwd;
+	}
+
+	public static void setRedisPwd(String redisPwd) {
+		PropsUtils.redisPwd = redisPwd;
+	}
+
+	public static String getRedisMasterName() {
+		return redisMasterName;
+	}
+
+	public static void setRedisMasterName(String redisMasterName) {
+		PropsUtils.redisMasterName = redisMasterName;
+	}
 
 	/**
 	 * 获取获取的最大长度
