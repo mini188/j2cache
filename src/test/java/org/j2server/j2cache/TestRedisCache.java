@@ -24,9 +24,17 @@ public class TestRedisCache {
 
 	@Before
 	public void setUp() throws Exception {
+		//jedis pool
 		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
 		PropsUtils.setRedisHost("127.0.0.1");
 		PropsUtils.setRedisPort(6379);
+
+		//sentinels pool
+//		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
+//		PropsUtils.setPoolModule(PropsUtils.JEDIS_SENTINEL_POOL);
+//		PropsUtils.setRedisHost("10.20.28.1:26380,10.20.28.2:26380,10.20.28.3:26380");
+//		PropsUtils.setRedisMasterName("mymaster");
+//		PropsUtils.setRedisPassword("default@1");
 	}
 
 	@After

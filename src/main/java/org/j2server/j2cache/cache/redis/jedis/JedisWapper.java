@@ -4,14 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.j2server.j2cache.utils.PropsUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.jedis.Protocol;
 import redis.clients.jedis.util.Pool;
 
 /**
@@ -24,41 +22,25 @@ import redis.clients.jedis.util.Pool;
 public class JedisWapper implements IJedisWapper{
 	private Pool<Jedis> pool;
 	
-	public JedisWapper() {
-		this(PropsUtils.getRedisHost(), PropsUtils.getRedisPort());
-	}
-
-	public JedisWapper(String host, Integer port) {
-		this(host,port, Protocol.DEFAULT_TIMEOUT);
-	}
-	
-	public JedisWapper(String host, Integer port, Integer timeOut) {
-		this(host, port, timeOut, null);
-	}
-	
-	public JedisWapper(String host, Integer port, String pwd) {
-		this(host, port, Protocol.DEFAULT_TIMEOUT, pwd);
-	}
-	
-	public JedisWapper(String host, Integer port, Integer timeOut,String pwd) {
-		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		if (StringUtils.isNotEmpty(pwd)) {
+	public JedisWapper(String host, Integer port, Integer timeOut, String pwd, GenericObjectPoolConfig<Jedis> poolConfig) {
+		if (timeOut != null && StringUtils.isNotEmpty(pwd) && poolConfig != null) {
 			pool = new JedisPool(poolConfig, host, port, timeOut, pwd);
+		} else if (poolConfig != null) {
+			pool = new JedisPool(poolConfig, host, port);
 		} else {
-			pool = new JedisPool(poolConfig, host, port, timeOut);
+			pool = new JedisPool(host, port);
 		}
 	}
 	
-	public JedisWapper(Set<HostAndPort> hostAndPorts, String masterName) {
-		this(hostAndPorts, null, masterName);
-	}
-	
-	public JedisWapper(Set<HostAndPort> hostAndPorts, String pwd, String masterName) {
+	public JedisWapper(Set<HostAndPort> hostAndPorts, String pwd, String masterName, final GenericObjectPoolConfig<Jedis> poolConfig) {
 		Set<String> sentinels = new HashSet<String>();
 		for (HostAndPort hap: hostAndPorts) {
 			sentinels.add(hap.toString());
 		}
-		if (StringUtils.isNotEmpty(pwd)) {
+		
+		if (poolConfig != null && StringUtils.isNotEmpty(pwd)) {
+			pool = new JedisSentinelPool(masterName, sentinels, poolConfig, pwd);
+		} else if (StringUtils.isNotEmpty(pwd)) {
 			pool = new JedisSentinelPool(masterName, sentinels, pwd);
 		} else {
 			pool = new JedisSentinelPool(masterName, sentinels);

@@ -7,7 +7,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Connection;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Protocol;
 
 /**
  * JedisCluster包装类。支持redis集群方式 </br>
@@ -19,32 +18,28 @@ import redis.clients.jedis.Protocol;
  */
 public class JedisClusterWapper implements IJedisWapper {
 	protected JedisCluster jedisCluster;
-	
-	public JedisClusterWapper(Set<HostAndPort> haps) {
-		this(haps, Protocol.DEFAULT_TIMEOUT, null, null);
-	}
-	
-	public JedisClusterWapper(Set<HostAndPort> haps, String password) {
-		this(haps, Protocol.DEFAULT_TIMEOUT, null, password);
-	}
-	
-	public JedisClusterWapper(Set<HostAndPort> haps, Integer timeout, Integer maxAttempts, String password) {
-		GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
+
+	public JedisClusterWapper(Set<HostAndPort> haps, Integer timeout, Integer maxAttempts, String password, 
+			GenericObjectPoolConfig<Connection> poolConfig) {
 		jedisCluster = newJedisCluster(haps, timeout, maxAttempts, password, poolConfig);
 	}
 
 	public static JedisCluster newJedisCluster(Set<HostAndPort> haps, Integer timeout, Integer maxAttempts,
 			String password, final GenericObjectPoolConfig<Connection> poolConfig) {
 		JedisCluster jedisCluster;
-		if (timeout != null && maxAttempts != null && password != null && poolConfig != null) {
-	        jedisCluster = new JedisCluster(haps, timeout, timeout, maxAttempts, password, poolConfig);
-		} else if (timeout != null && maxAttempts != null) {
-			jedisCluster = new JedisCluster(haps, timeout, maxAttempts);
-		} else if (timeout != null) {
-			jedisCluster = new JedisCluster(haps, timeout);
-		} else {
-			jedisCluster = new JedisCluster(haps);
-		}
+        if (timeout != null && maxAttempts != null && password != null && poolConfig != null) {
+            jedisCluster = new JedisCluster(haps, timeout, timeout, maxAttempts, password, poolConfig);
+        } else if (timeout != null && maxAttempts != null && poolConfig != null) {
+            jedisCluster = new JedisCluster(haps, timeout, maxAttempts, poolConfig);
+        } else if (timeout != null && maxAttempts != null) {
+            jedisCluster = new JedisCluster(haps, timeout, maxAttempts);
+        } else if (timeout != null && poolConfig != null) {
+            jedisCluster = new JedisCluster(haps, timeout, poolConfig);
+        } else if (timeout != null) {
+            jedisCluster = new JedisCluster(haps, timeout);
+        } else {
+            jedisCluster = new JedisCluster(haps);
+        }
 		return jedisCluster;
 	}
 
