@@ -31,17 +31,16 @@ public class RedisCache<K, V> implements ICache<K, V> {
      * @param maxSize
      * @param maxLifetime
      * @param keyClass
-     * @param valueCalss
-     * @param this.jedis
+     * @param valueClass
      */
     public RedisCache(String name, String keyPrefix, long maxSize, long maxLifetime, Class<K> keyClass,
-                      Class<V> valueCalss) {
+                      Class<V> valueClass) {
         this.name = name;
         this.maxCacheSize = maxSize;
         this.maxLifetime = maxLifetime;
     	this.jedis = JedisWapperFactory.createJedisWapper();
         this.keyClass = keyClass;
-        this.valueClass = valueCalss;
+        this.valueClass = valueClass;
         this.keyPrefix = keyPrefix;
     }
 	

@@ -19,16 +19,16 @@ public class CacheObjectHolder {
 		}
 	}
 	
-	public CacheObject put(String cahceName, CacheObject value) {
-		return cacheObjectManager.put(cahceName, value);
+	public CacheObject put(String cacheName, CacheObject value) {
+		return cacheObjectManager.put(cacheName, value);
 	}
 
-	public CacheObject get(String cahceName) {
-		return cacheObjectManager.get(cahceName);
+	public CacheObject get(String cacheName) {
+		return cacheObjectManager.get(cacheName);
 	}
 
-	public CacheObject remove(String cahceName) {
-		return cacheObjectManager.remove(cahceName);
+	public CacheObject remove(String cacheName) {
+		return cacheObjectManager.remove(cacheName);
 	}
 
 	public Collection<CacheObject> getAllCaches() {

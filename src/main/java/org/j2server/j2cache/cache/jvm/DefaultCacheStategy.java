@@ -10,8 +10,8 @@ public class DefaultCacheStategy implements ICacheStrategy {
 
 	@Override
 	public ICache createCache(String name, Class<?> keyClass,
-			Class<?> valueCalss) {
-		return createCache(name, keyClass, valueCalss,
+			Class<?> valueClass) {
+		return createCache(name, keyClass, valueClass,
 				PropsUtils.getCacheMaxSize(),
 				PropsUtils.getCacheMaxLifeTime());
 	}
@@ -23,7 +23,7 @@ public class DefaultCacheStategy implements ICacheStrategy {
 
 	@Override
 	public ICache createCache(String name, Class<?> keyClass,
-			Class<?> valueCalss, long maxSize, long maxLifetime) {
+			Class<?> valueClass, long maxSize, long maxLifetime) {
 		return new DefaultCache(name, maxSize, maxLifetime);
 	}
 

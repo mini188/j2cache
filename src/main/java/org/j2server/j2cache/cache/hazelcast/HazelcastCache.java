@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.hazelcast.map.IMap;
 import org.j2server.j2cache.cache.ICache;
 
-import com.hazelcast.core.IMap;
 
 public class HazelcastCache<K, V> implements ICache<K, V>{
 	private String name;
@@ -45,17 +45,17 @@ public class HazelcastCache<K, V> implements ICache<K, V>{
 
 	@Override
 	public V get(Object key) {
-		return (V)map.get(key);
+		return map.get(key);
 	}
 
 	@Override
 	public V put(K key, V value) {
-		return (V) map.put(key,  value);
+		return map.put(key,  value);
 	}
 
 	@Override
 	public V remove(Object key) {
-		return (V) map.remove(key);
+		return map.remove(key);
 	}
 
 	@Override

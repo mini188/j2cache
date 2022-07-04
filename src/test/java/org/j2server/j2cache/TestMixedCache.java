@@ -16,11 +16,11 @@ public class TestMixedCache {
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp(){
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 	
 	@Test
@@ -49,14 +49,14 @@ public class TestMixedCache {
 			DataClass obj = new DataClass();
 			obj.setName("data-1");
 			obj.setStrValue("test str");
-			obj.setValue(100l);
+			obj.setValue(100L);
 			cacheObject.put(key, obj);
 			
 			DataClass cacheObj = cacheObject.get(key);
 			Assert.assertNotNull(cacheObj);
-			Assert.assertTrue(obj.getName().equals(cacheObj.getName()));
-			Assert.assertTrue(obj.getStrValue().equals(cacheObj.getStrValue()));
-			Assert.assertTrue(obj.getValue() == cacheObj.getValue());
+			Assert.assertEquals(obj.getName(), cacheObj.getName());
+			Assert.assertEquals(obj.getStrValue(), cacheObj.getStrValue());
+			Assert.assertEquals(obj.getValue(), cacheObj.getValue());
 		} finally {
 			CacheManager.destroyCache(cacheObject.getName());
 		}

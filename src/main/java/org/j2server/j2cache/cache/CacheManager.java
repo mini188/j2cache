@@ -10,31 +10,29 @@ import org.slf4j.LoggerFactory;
 
 public class CacheManager {
 	private final static Logger	logger = LoggerFactory.getLogger(CacheManager.class);
-	private static CacheObjectHolder caches = new CacheObjectHolder();
+	private static final CacheObjectHolder caches = new CacheObjectHolder();
 
 	/**
 	 * 获取或创建缓存
 	 * @param cacheName  缓存名
 	 * @param keyClass   键的类型
-	 * @param valueCalss 值的类型
+	 * @param valueClass 值的类型
 	 * @return 缓存对象
-	 * @throws Exception 如果provider为空时会抛出异常
 	 */
-	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss) {
-		return getOrCreateCache(cacheName, keyClass, valueCalss, 0l, 0l);
+	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueClass) {
+		return getOrCreateCache(cacheName, keyClass, valueClass, 0L, 0L);
 	}
 	
 	/**
 	 * 获取或创建缓存
 	 * @param cacheName  缓存名
 	 * @param keyClass   键的类型
-	 * @param valueCalss 值的类型
+	 * @param valueClass 值的类型
 	 * @return 缓存对象
-	 * @throws Exception 如果provider为空时会抛出异常
 	 */
-	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueCalss, long maxSize, long maxLifetime) {
+	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueClass, long maxSize, long maxLifetime) {
 		try {
-			return getOrCreateCache(PropsUtils.getCacheStrategyClass(), cacheName, keyClass, valueCalss, maxSize, maxLifetime);
+			return getOrCreateCache(PropsUtils.getCacheStrategyClass(), cacheName, keyClass, valueClass, maxSize, maxLifetime);
 		} catch (Exception e) {
 			logger.error("create cache error.", e);
 			return null;
@@ -43,44 +41,43 @@ public class CacheManager {
 	
 	/**
 	 * 可以指定缓存提供者的方式获取或创建缓存
-	 * @param stategy    缓存策略
+	 * @param stately    缓存策略
 	 * @param cacheName  缓存名
 	 * @param keyClass   键的类类型
-	 * @param valueCalss 值的类类型
+	 * @param valueClass 值的类类型
 	 * @return 缓存对象
-	 * @throws Exception 如果stategy为空时会抛出异常
+	 * @throws Exception 如果stately为空时会抛出异常
 	 */
 	public static <T extends ICache<?,?>> T  getOrCreateCache(
-			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss) throws Exception {
-		return getOrCreateCache(stategy, cacheName, keyClass, valueCalss, 0l, 0l);
+			String stately, String cacheName, Class<?> keyClass, Class<?> valueClass) throws Exception {
+		return getOrCreateCache(stately, cacheName, keyClass, valueClass, 0L, 0L);
 	}
 	
 	/**
 	 * 可以指定缓存提供者的方式获取或创建缓存
-	 * @param stategy    缓存策略类
+	 * @param stately    缓存策略类
 	 * @param cacheName  缓存名
 	 * @param keyClass   键的类类型
-	 * @param valueCalss 值的类类型
+	 * @param valueClass 值的类类型
 	 * @param maxSize    最大缓存大小(0表示不限制)
-	 * @param maxLieftime缓存过期时间(0表示不过期)
 	 * @return 缓存对象
-	 * @throws Exception 如果stategy为空时会抛出异常
+	 * @throws Exception 如果stately为空时会抛出异常
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends ICache<?,?>> T  getOrCreateCache(
-			String stategy, String cacheName, Class<?> keyClass, Class<?> valueCalss, 
+			String stately, String cacheName, Class<?> keyClass, Class<?> valueClass,
 			long maxSize, long maxLifetime) throws Exception {
-		if (stategy == null) {
-			throw new NullArgumentException("stategy");
+		if (stately == null) {
+			throw new NullArgumentException("stately");
 		}
 		
 		CacheObject cacheObj = caches.get(cacheName);
 	    if (cacheObj != null) {
 	        return (T) cacheObj.getCache();
 	    }
-		ICacheStrategy starategy = (ICacheStrategy) Class.forName(stategy).newInstance();
-	    T cache = (T) starategy.createCache(cacheName, keyClass, valueCalss, maxSize, maxLifetime);
-	    caches.put(cacheName, new CacheObject(starategy, cache));
+		ICacheStrategy strategy = (ICacheStrategy) Class.forName(stately).newInstance();
+	    T cache = (T) strategy.createCache(cacheName, keyClass, valueClass, maxSize, maxLifetime);
+	    caches.put(cacheName, new CacheObject(strategy, cache));
 		return cache;
 	}
 
@@ -93,11 +90,11 @@ public class CacheManager {
 	}
 	
 	public static ICache<?,?>[] getAllCaches() {
-		List<ICache<?,?>> values = new ArrayList<ICache<?,?>>();
+		List<ICache<?,?>> values = new ArrayList<>();
 		for (CacheObject item: caches.getAllCaches()) {
 			values.add(item.getCache());
 		}
 			
-		return values.toArray(new ICache<?,?>[values.size()]);
+		return values.toArray(new ICache<?, ?>[0]);
 	}
 }

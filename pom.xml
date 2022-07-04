@@ -5,7 +5,7 @@
 
 	<groupId>org.j2server</groupId>
 	<artifactId>j2cache</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>j2cache</name>
@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
-			<version>3.10.1</version>
+			<version>5.1.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->

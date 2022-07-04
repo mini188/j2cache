@@ -4,7 +4,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
 
 public class IgniteInstance {
-	private static IgniteInstance _instance = new IgniteInstance();
+	private static final IgniteInstance _instance = new IgniteInstance();
 	private Ignite ignite;
 	
 	private IgniteInstance() {

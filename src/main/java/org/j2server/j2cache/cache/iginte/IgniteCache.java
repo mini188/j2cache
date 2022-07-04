@@ -24,7 +24,7 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 		this.name = name;
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
-		CacheConfiguration<K, V> config = new CacheConfiguration<K, V>();
+		CacheConfiguration<K, V> config = new CacheConfiguration<>();
 		config.setName(name);
 		if (maxLifetime > 0) {
 			config.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(new Duration(TimeUnit.MILLISECONDS, maxLifetime)));
@@ -130,36 +130,4 @@ public class IgniteCache<K, V> implements ICache<K, V> {
 		return this.cacheSize;
 	}
 
-	/**
-	 * 用于
-	 * @author xiexb
-	 *
-	 * @param <K>
-	 * @param <V>
-	 */
-	static class EntryWapper<K, V> implements java.util.Map.Entry<K, V> {
-		private K k;
-		private V v;
-		
-		@Override
-		public K getKey() {
-			return k;
-		}
-
-		@Override
-		public V getValue() {
-			return v;
-		}
-
-		@Override
-		public V setValue(V value) {
-			v = value;
-			return v;
-		}
-		
-		public K setKey(K value) {
-			k = value;
-			return k;
-		}
-	}
 }

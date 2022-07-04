@@ -53,22 +53,22 @@ public class PropsUtils {
 
 	/**
 	 * 获取获取的最大长度
-	 * @return
+	 * @return cache max size
 	 */
 	public static long getCacheMaxSize() {
-		return 0l;
+		return 0L;
 	}
 	
 	public static long getCacheMaxLifeTime() {
-		return 0l;
+		return 0L;
 	}
 	
 	public static String getCacheStrategyClass() {
 		return cacheStrategyClass;
 	}
 	
-	public static void setCacheStrategyClass(String stategy) {
-		cacheStrategyClass = stategy;
+	public static void setCacheStrategyClass(String stately) {
+		cacheStrategyClass = stately;
 	}
 	
 	public static String getRedisHost() {

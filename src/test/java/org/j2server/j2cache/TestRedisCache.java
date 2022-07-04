@@ -23,7 +23,7 @@ public class TestRedisCache {
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		//jedis pool
 		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
 		PropsUtils.setRedisHost("127.0.0.1");
@@ -38,7 +38,7 @@ public class TestRedisCache {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 	
 	@Test
@@ -49,14 +49,14 @@ public class TestRedisCache {
 			DataClass obj = new DataClass();
 			obj.setName("data-1");
 			obj.setStrValue("test str");
-			obj.setValue(100l);
+			obj.setValue(100L);
 			cache.put(key, obj);
 			
 			DataClass cacheObj = cache.get(key);
 			Assert.assertNotNull(cacheObj);
-			Assert.assertTrue(obj.getName().equals(cacheObj.getName()));
-			Assert.assertTrue(obj.getStrValue().equals(cacheObj.getStrValue()));
-			Assert.assertTrue(obj.getValue() == cacheObj.getValue());
+			Assert.assertEquals(obj.getName(), cacheObj.getName());
+			Assert.assertEquals(obj.getStrValue(), cacheObj.getStrValue());
+			Assert.assertEquals(obj.getValue(), cacheObj.getValue());
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
@@ -66,10 +66,10 @@ public class TestRedisCache {
 	public void testReadAndWrite() {
 		ICache<String, DataClass> cache = CacheManager.getOrCreateCache("redisCache", String.class, DataClass.class);
 		try {
-			Integer cnt = 10010;
+			int cnt = 10010;
 			System.out.println("开始缓存写入测试" + cache.getName());
 			long begin = System.currentTimeMillis();
-			long size = 0l;
+			long size = 0L;
 			char[] chars = new char[1024];
 			Arrays.fill(chars, 'x');
 			String body = new String(chars);
@@ -84,9 +84,9 @@ public class TestRedisCache {
 			long end = System.currentTimeMillis();
 			double diff = end - begin;
 			System.out.println("总共耗时：" + diff);
-			System.out.println(String.format("每毫秒写入:%.2f条。", cnt / diff));
-			System.out.println(String.format("每秒写入:%.2f条。", cnt / diff * 1000));
-			System.out.println(String.format("每秒写入：%.2f mb", size / 1024 / 1024 / diff * 1000));
+			System.out.printf("每毫秒写入:%.2f条。%n", cnt / diff);
+			System.out.printf("每秒写入:%.2f条。%n", cnt / diff * 1000);
+			System.out.printf("每秒写入：%.2f mb%n", size / 1024 / 1024 / diff * 1000);
 
 			System.out.println("开始缓存读取测试" + cache.getName());
 			begin = System.currentTimeMillis();
@@ -96,21 +96,22 @@ public class TestRedisCache {
 			end = System.currentTimeMillis();
 			diff = end - begin;
 			System.out.println("读取总共耗时：" + diff);
-			System.out.println(String.format("每毫秒读取:%.2f条。", cnt / diff));
-			System.out.println(String.format("每秒读取:%.2f条。", cnt / diff * 1000));
-			System.out.println(String.format("每秒读取：%.2f mb", size / 1024 / 1024 / diff * 1000));
+			System.out.printf("每毫秒读取:%.2f条。%n", cnt / diff);
+			System.out.printf("每秒读取:%.2f条。%n", cnt / diff * 1000);
+			System.out.printf("每秒读取：%.2f mb%n", size / 1024 / 1024 / diff * 1000);
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
 	}
 
 	@Test
-	public void testExprie() {
+	public void testExpire() {
 		long expire = 3000L;
 		ICache<String, String> cache = CacheManager.getOrCreateCache("redisCacheExpire", 
 				String.class, String.class, 0, expire);
 		String key = "testKey";
 		String actual = "testValue";
+		assert cache != null;
 		cache.put(key, actual);
 		try {
 			long waitTime = 0;
@@ -141,7 +142,7 @@ public class TestRedisCache {
 
 		try {
 			Collection<String> values = cache.values();
-			Assert.assertEquals(size, values == null ? 0 : values.size());
+			Assert.assertEquals(size, values.size());
 			int randomIdx = new Random().nextInt(size);
 			Assert.assertTrue(values.contains("testValue"+randomIdx));
 		} finally {
@@ -162,7 +163,7 @@ public class TestRedisCache {
 			Assert.assertEquals(size, keySets == null ? 0 : keySets.size());
 			int randomIdx = new Random().nextInt(size);
 			String randomKey = "testKey"+randomIdx;
-			Assert.assertTrue(keySets.stream().filter(e -> randomKey.equals(e.getKeyName())).findAny().isPresent());
+			Assert.assertTrue(keySets.stream().anyMatch(e -> randomKey.equals(e.getKeyName())));
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
@@ -181,7 +182,7 @@ public class TestRedisCache {
 			Assert.assertEquals(size, keySets == null ? 0 : keySets.size());
 			int randomIdx = new Random().nextInt(size);
 			String randomKey = "testKey"+randomIdx;
-			Assert.assertTrue(keySets.stream().filter(e -> randomKey.equals(e)).findAny().isPresent());
+			Assert.assertTrue(keySets.stream().anyMatch(randomKey::equals));
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
@@ -190,12 +191,12 @@ public class TestRedisCache {
 	@Test
 	public void testClear() {
 		ICache<String, String> cache = CacheManager.getOrCreateCache("redisCacheClear", String.class, String.class);
-		Integer cnt = 100;
+		int cnt = 100;
 		for (int i = 0; i < cnt; i++) {
 			cache.put(Integer.toString(i), "value"+i);
 		}
 		
 		CacheManager.destroyCache(cache.getName());
-		Assert.assertTrue(0 == cache.size());
+		Assert.assertEquals(0, cache.size());
 	}
 }

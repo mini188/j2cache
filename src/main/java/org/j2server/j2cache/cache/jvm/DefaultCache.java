@@ -31,7 +31,7 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 		this.maxCacheSize = maxSize;
 		this.maxLifetime = maxLifetime;
 		keyLinklist = new LinkedList<>();
-		map = new ConcurrentHashMap<K, CacheWapper<V>>(103);		
+		map = new ConcurrentHashMap<>(103);
 	}
 	
 	@Override
@@ -54,12 +54,11 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 
 	@Override
 	public boolean containsValue(Object value) {
-        Iterator<?> it = values().iterator();
-        while(it.hasNext()) {
-            if(value.equals(it.next())) {
-                 return true;
-            }
-        }
+		for (V v : values()) {
+			if (value.equals(v)) {
+				return true;
+			}
+		}
         return false;
 	}
 
@@ -119,11 +118,10 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
-        for (Iterator<? extends K> i = m.keySet().iterator(); i.hasNext();) {
-            K key = i.next();
-            V value = m.get(key);
-            put(key, value);
-        }
+		for (K key : m.keySet()) {
+			V value = m.get(key);
+			put(key, value);
+		}
 	}
 
 	@Override
@@ -148,13 +146,13 @@ public class DefaultCache<K, V> implements ICache<K, V> {
 	@Override
 	public Collection<V> values() {
 		clearExpireCache();
-		return new CacheObjectCollection<V>(map.values());
+		return new CacheObjectCollection<>(map.values());
 	}
 
     /**
      * Wraps a cached object collection to return a view of its inner objects
      */
-    private final class CacheObjectCollection<T> extends AbstractCollection<T> {
+    private static final class CacheObjectCollection<T> extends AbstractCollection<T> {
         private Collection<CacheWapper<T>> cachedObjects;
 
         private CacheObjectCollection(Collection<CacheWapper<T>> cachedObjects) {

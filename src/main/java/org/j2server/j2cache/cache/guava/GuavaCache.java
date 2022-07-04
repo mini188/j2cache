@@ -41,7 +41,7 @@ public class GuavaCache<K, V> implements ICache<K, V> {
 
 	@Override
 	public int size() {
-		Long size = new Long(map.size());
+		Long size = map.size();
 		return size.intValue();
 	}
 

@@ -1,13 +1,12 @@
 package org.j2server.j2cache.cache.hazelcast;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 public class HazelcastLocal {
-	private static HazelcastLocal _instance = new HazelcastLocal();
+	private static final HazelcastLocal _instance = new HazelcastLocal();
 	private HazelcastInstance hazelcast;
 
 	private HazelcastLocal() {
@@ -28,7 +27,6 @@ public class HazelcastLocal {
 		MapConfig mapConfig = hazelcast.getConfig().getMapConfig(mapName);
 		if (timeToLiveSeconds > 0) {
 			mapConfig.setTimeToLiveSeconds(timeToLiveSeconds);
-			mapConfig.setEvictionPolicy(EvictionPolicy.RANDOM);
 		}
 
 		return hazelcast;

@@ -9,8 +9,8 @@ public class HazelcastCacheStategy implements ICacheStrategy{
 
 	@Override
 	public ICache createCache(String name, Class<?> keyClass,
-			Class<?> valueCalss) {
-		return createCache(name, keyClass, valueCalss, PropsUtils.getCacheMaxSize(), PropsUtils.getCacheMaxSize());
+			Class<?> valueClass) {
+		return createCache(name, keyClass, valueClass, PropsUtils.getCacheMaxSize(), PropsUtils.getCacheMaxSize());
 	}
 
 	@Override
@@ -20,7 +20,7 @@ public class HazelcastCacheStategy implements ICacheStrategy{
 
 	@Override
 	public ICache createCache(String name, Class<?> keyClass,
-			Class<?> valueCalss, long maxSize, long maxLifetime) {
+			Class<?> valueClass, long maxSize, long maxLifetime) {
 		return new HazelcastCache(name, maxSize, maxLifetime);
 	}
 
