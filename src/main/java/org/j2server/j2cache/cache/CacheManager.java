@@ -88,10 +88,18 @@ public class CacheManager {
 	    if (cacheObj != null) {
 	        return (T) cacheObj.getCache();
 	    }
-		ICacheStrategy strategy = (ICacheStrategy) Class.forName(stately).newInstance();
-	    T cache = (T) strategy.createCache(cacheName, keyClass, valueClass, maxSize, maxLifetime);
-	    caches.put(cacheName, new CacheObject(strategy, cache));
-		return cache;
+
+		synchronized (cacheName.intern()) {
+			cacheObj = caches.get(cacheName);
+			if (cacheObj != null) {
+				return (T) cacheObj.getCache();
+			}
+
+			ICacheStrategy strategy = (ICacheStrategy) Class.forName(stately).newInstance();
+			T cache = (T) strategy.createCache(cacheName, keyClass, valueClass, maxSize, maxLifetime);
+			caches.put(cacheName, new CacheObject(strategy, cache));
+			return cache;
+		}
 	}
 
 
