@@ -22,6 +22,19 @@ public class CacheManager {
 	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueClass) {
 		return getOrCreateCache(cacheName, keyClass, valueClass, 0L, 0L);
 	}
+
+
+	/**
+	 * 获取或创建缓存
+	 * @param cacheName  缓存名
+	 * @param keyClass   键的类型
+	 * @param valueClass 值的类型
+	 * @param maxLifetime 过期时间
+	 * @return 缓存对象
+	 */
+	public static <T extends ICache<?,?>> T  getOrCreateCache(String cacheName, Class<?> keyClass, Class<?> valueClass, long maxLifetime) {
+		return getOrCreateCache(cacheName, keyClass, valueClass, 0L, maxLifetime);
+	}
 	
 	/**
 	 * 获取或创建缓存
