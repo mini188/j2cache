@@ -1,17 +1,15 @@
 package org.j2server.j2cache.cache.redis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.cache.ICache;
+import org.j2server.j2cache.cache.serializer.ISerializer;
+import org.j2server.j2cache.cache.serializer.SerializerManager;
 import org.j2server.j2cache.cache.redis.jedis.IJedisWapper;
 import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
+import org.j2server.j2cache.cache.serializer.SerializerType;
 
-import com.alibaba.fastjson.JSON;
+import java.util.*;
 
 public class RedisCache<K, V> implements ICache<K, V> {
 	private Class<K> keyClass;
@@ -23,6 +21,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 	private String keyPrefix;
 	
 	private IJedisWapper jedis;
+    private ISerializer serializer;
 
     /**
      * 
@@ -42,6 +41,9 @@ public class RedisCache<K, V> implements ICache<K, V> {
         this.keyClass = keyClass;
         this.valueClass = valueClass;
         this.keyPrefix = keyPrefix;
+
+        this.serializer = SerializerManager.me().getSerializer(SerializerType.FASTJSON.getTypeName());
+
     }
 	
     /**
@@ -85,7 +87,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 		if (valueJson == null) {
 			return null;
 		}
-		return JSON.parseObject(valueJson, valueClass);
+		return (V) this.serializer.deserialize(valueJson);
     }
 
     /**
@@ -95,9 +97,9 @@ public class RedisCache<K, V> implements ICache<K, V> {
     public V put(K key, V value) {
     	Integer expire = getExpire();
     	if (expire > 0) {
-    		this.jedis.setex(buildCacheKey(key), expire, JSON.toJSONBytes(value));
+    		this.jedis.setex(buildCacheKey(key), expire,  this.serializer.serialize(value));
     	} else {
-    		this.jedis.set(buildCacheKey(key), JSON.toJSONBytes(value));
+    		this.jedis.set(buildCacheKey(key),  this.serializer.serialize(value));
 		}
         return value;
     }
@@ -180,7 +182,17 @@ public class RedisCache<K, V> implements ICache<K, V> {
     }
 
 	private Set<byte[]> getAllKesByCacheName() {
-		return this.jedis.keys(String.format("%s:*", name).getBytes());
+        String keyPrefix = "";
+
+        if (StringUtils.isNotEmpty(this.keyPrefix)) {
+            keyPrefix += this.keyPrefix;
+        }
+
+        if (StringUtils.isNotEmpty(keyPrefix)) {
+            keyPrefix += ":";
+        }
+
+		return this.jedis.keys(String.format("%s%s:*", keyPrefix, name).getBytes());
 	}
 
     public Set<Map.Entry<K, V>> entrySet() {

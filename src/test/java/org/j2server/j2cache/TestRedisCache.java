@@ -1,14 +1,13 @@
 package org.j2server.j2cache;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
+import com.alibaba.fastjson.TypeReference;
 import org.j2server.j2cache.cache.CacheManager;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.cache.redis.RedisCacheStategy;
 import org.j2server.j2cache.entites.DataClass;
+import org.j2server.j2cache.entites.GenericDataClass;
 import org.j2server.j2cache.entites.KeyClass;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.junit.After;
@@ -28,6 +27,7 @@ public class TestRedisCache {
 		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
 		PropsUtils.setRedisHost("127.0.0.1");
 		PropsUtils.setRedisPort(6379);
+		PropsUtils.setRedisKeyPrefix("j2cache");
 
 		//sentinels pool
 //		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());
@@ -57,6 +57,76 @@ public class TestRedisCache {
 			Assert.assertEquals(obj.getName(), cacheObj.getName());
 			Assert.assertEquals(obj.getStrValue(), cacheObj.getStrValue());
 			Assert.assertEquals(obj.getValue(), cacheObj.getValue());
+		} finally {
+			CacheManager.destroyCache(cache.getName());
+		}
+	}
+
+	@Test
+	public void testGenericTypeCacheObject() {
+		ICache<String, GenericDataClass<DataClass>> cache = CacheManager.getOrCreateCache("genericTypeCacheObject",
+				String.class,
+				GenericDataClass.class);
+		try {
+			String key = "objectKey";
+
+			List<DataClass> lists = new ArrayList<>();
+				DataClass data1 = new DataClass();
+				data1.setName("data-1");
+				data1.setStrValue("test str");
+				data1.setValue(100L);
+			lists.add(data1);
+
+				DataClass data2 = new DataClass();
+				data2.setName("data-1");
+				data2.setStrValue("test str");
+				data2.setValue(100L);
+			lists.add(data2);
+
+
+			GenericDataClass<DataClass> obj = new GenericDataClass<>();
+			obj.setName("generic data object");
+			obj.setList(lists);
+			cache.put(key, obj);
+
+			GenericDataClass<DataClass> cacheObj = cache.get(key);
+			Assert.assertNotNull(cacheObj);
+			Assert.assertEquals(obj.getName(), cacheObj.getName());
+			Assert.assertEquals(obj.getList().size(), cacheObj.getList().size());
+			Assert.assertEquals(obj.getList().get(0).getStrValue(), cacheObj.getList().get(0).getStrValue());
+		} finally {
+			CacheManager.destroyCache(cache.getName());
+		}
+	}
+
+	@Test
+	public void testListCacheObject() {
+		ICache<String, List<DataClass>> cache = CacheManager.getOrCreateCache("listCacheObject",
+				String.class,
+				List.class);
+		try {
+			String key = "list-object-Key";
+
+			List<DataClass> lists = new ArrayList<>();
+			DataClass data1 = new DataClass();
+			data1.setName("data-1");
+			data1.setStrValue("test str");
+			data1.setValue(100L);
+			lists.add(data1);
+
+			DataClass data2 = new DataClass();
+			data2.setName("data-1");
+			data2.setStrValue("test str");
+			data2.setValue(100L);
+			lists.add(data2);
+
+			System.out.println(JSON.toJSONString(lists));
+			cache.put(key, lists);
+
+			List<DataClass> cacheObj = cache.get(key);
+			Assert.assertNotNull(cacheObj);
+			Assert.assertEquals(lists.size(), cacheObj.size());
+			Assert.assertEquals(lists.get(0).getValue(), cacheObj.get(0).getValue());
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
