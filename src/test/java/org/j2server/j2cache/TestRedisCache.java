@@ -1,13 +1,14 @@
 package org.j2server.j2cache;
 
+import java.security.Key;
 import java.util.*;
 
-import com.alibaba.fastjson.TypeReference;
 import org.j2server.j2cache.cache.CacheManager;
 import org.j2server.j2cache.cache.ICache;
 import org.j2server.j2cache.cache.redis.RedisCacheStategy;
 import org.j2server.j2cache.entites.DataClass;
 import org.j2server.j2cache.entites.GenericDataClass;
+import org.j2server.j2cache.entites.GenericKeyClass;
 import org.j2server.j2cache.entites.KeyClass;
 import org.j2server.j2cache.utils.PropsUtils;
 import org.junit.After;
@@ -68,25 +69,8 @@ public class TestRedisCache {
 				String.class,
 				GenericDataClass.class);
 		try {
+			GenericDataClass<DataClass> obj = buildGenericData();
 			String key = "objectKey";
-
-			List<DataClass> lists = new ArrayList<>();
-				DataClass data1 = new DataClass();
-				data1.setName("data-1");
-				data1.setStrValue("test str");
-				data1.setValue(100L);
-			lists.add(data1);
-
-				DataClass data2 = new DataClass();
-				data2.setName("data-1");
-				data2.setStrValue("test str");
-				data2.setValue(100L);
-			lists.add(data2);
-
-
-			GenericDataClass<DataClass> obj = new GenericDataClass<>();
-			obj.setName("generic data object");
-			obj.setList(lists);
 			cache.put(key, obj);
 
 			GenericDataClass<DataClass> cacheObj = cache.get(key);
@@ -97,6 +81,27 @@ public class TestRedisCache {
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
+	}
+
+	private GenericDataClass<DataClass> buildGenericData() {
+		List<DataClass> lists = new ArrayList<>();
+		DataClass data1 = new DataClass();
+		data1.setName("data-1");
+		data1.setStrValue("test str");
+		data1.setValue(100L);
+		lists.add(data1);
+
+		DataClass data2 = new DataClass();
+		data2.setName("data-1");
+		data2.setStrValue("test str");
+		data2.setValue(100L);
+		lists.add(data2);
+
+
+		GenericDataClass<DataClass> obj = new GenericDataClass<>();
+		obj.setName("generic data object");
+		obj.setList(lists);
+		return obj;
 	}
 
 	@Test
@@ -234,6 +239,39 @@ public class TestRedisCache {
 			int randomIdx = new Random().nextInt(size);
 			String randomKey = "testKey"+randomIdx;
 			Assert.assertTrue(keySets.stream().anyMatch(e -> randomKey.equals(e.getKeyName())));
+		} finally {
+			CacheManager.destroyCache(cache.getName());
+		}
+	}
+
+	@Test
+	public void testGenericKeySet() {
+		ICache<GenericKeyClass<KeyClass>, String> cache = CacheManager.getOrCreateCache("redisCacheGenericKeySet", GenericKeyClass.class, String.class);
+		int size = 5;
+
+		List<KeyClass> lists = new ArrayList<>();
+		KeyClass key1 = new KeyClass();
+		key1.setKeyName("generic-key-1");
+		lists.add(key1);
+
+		KeyClass key2 = new KeyClass();
+		key2.setKeyName("generic-key-2");
+		lists.add(key2);
+
+		for (int i = 0; i < size; i++) {
+			GenericKeyClass<KeyClass> keyObjs = new GenericKeyClass<>();
+			keyObjs.setName("genericKey" + i);
+			keyObjs.setList(lists);
+
+			cache.put(keyObjs, "testValue" + i);
+		}
+
+		try {
+			Set<GenericKeyClass<KeyClass>> keySets = cache.keySet();
+			Assert.assertEquals(size, keySets == null ? 0 : keySets.size());
+			int randomIdx = new Random().nextInt(size);
+			String randomKey = "genericKey"+randomIdx;
+			Assert.assertTrue(keySets.stream().anyMatch(e -> randomKey.equals(e.getName())));
 		} finally {
 			CacheManager.destroyCache(cache.getName());
 		}
