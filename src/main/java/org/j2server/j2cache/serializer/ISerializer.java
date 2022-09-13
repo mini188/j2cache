@@ -1,4 +1,4 @@
-package org.j2server.j2cache.cache.serializer;
+package org.j2server.j2cache.serializer;
 
 /**
  * 序列化

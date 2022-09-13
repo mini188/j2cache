@@ -1,4 +1,4 @@
-package org.j2server.j2cache.cache.serializer;
+package org.j2server.j2cache.serializer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;

@@ -3,11 +3,11 @@ package org.j2server.j2cache.cache.redis;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.cache.ICache;
-import org.j2server.j2cache.cache.serializer.ISerializer;
-import org.j2server.j2cache.cache.serializer.SerializerManager;
+import org.j2server.j2cache.serializer.ISerializer;
+import org.j2server.j2cache.serializer.SerializerManager;
 import org.j2server.j2cache.cache.redis.jedis.IJedisWapper;
 import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
-import org.j2server.j2cache.cache.serializer.SerializerType;
+import org.j2server.j2cache.serializer.SerializerType;
 
 import java.util.*;
 
