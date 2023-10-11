@@ -87,7 +87,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
 		if (valueJson == null) {
 			return null;
 		}
-		return (V) this.serializer.deserialize(valueJson);
+		return this.serializer.deserialize(valueJson, valueClass);
     }
 
     /**

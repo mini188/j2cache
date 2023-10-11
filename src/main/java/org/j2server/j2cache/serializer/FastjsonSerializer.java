@@ -30,4 +30,13 @@ public class FastjsonSerializer implements ISerializer{
 
         return JSON.parse(new String(bytes, IOUtils.UTF8), autoTypeSupportConfig);
     }
+
+    @Override
+    public <V> V deserialize(byte[] bytes, Class<V> clazz) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        return JSON.parseObject(new String(bytes, IOUtils.UTF8), clazz,autoTypeSupportConfig);
+    }
 }
