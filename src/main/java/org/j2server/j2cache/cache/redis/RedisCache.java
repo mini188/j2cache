@@ -3,10 +3,10 @@ package org.j2server.j2cache.cache.redis;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.j2server.j2cache.cache.ICache;
-import org.j2server.j2cache.serializer.ISerializer;
-import org.j2server.j2cache.serializer.SerializerManager;
 import org.j2server.j2cache.cache.redis.jedis.IJedisWapper;
 import org.j2server.j2cache.cache.redis.jedis.JedisWapperFactory;
+import org.j2server.j2cache.serializer.ISerializer;
+import org.j2server.j2cache.serializer.SerializerManager;
 import org.j2server.j2cache.serializer.SerializerType;
 
 import java.util.*;
@@ -134,23 +134,7 @@ public class RedisCache<K, V> implements ICache<K, V> {
      */
     @Override
     public void clear() {
-    	Set<byte[]> keys = getAllKesByCacheName();
-    	int batchSize = keys.size() > 1000 ? 1000: keys.size();
-		byte[][] dels = new byte[batchSize][];
-		int i = 0;
-    	for (byte[] k: keys) {
-    		if (i >= batchSize) {
-        		jedis.unlink(dels);
-        		i = 0;
-    		}
-    		
-    		dels[i] = k;
-    		i++;
-    	}
-    	
-    	if (i > 0) {
-    		jedis.unlink(dels);
-    	}
+        jedis.unlink(String.format("%s%s:*", keyPrefix, name).getBytes());
     }
 
     /**
