@@ -6,10 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.*;
 import redis.clients.jedis.util.Pool;
 
 /**
@@ -23,8 +20,9 @@ public class JedisWapper implements IJedisWapper{
 	private Pool<Jedis> pool;
 	
 	public JedisWapper(String host, Integer port, Integer timeOut, String pwd, GenericObjectPoolConfig<Jedis> poolConfig) {
-		if (timeOut != null && StringUtils.isNotEmpty(pwd) && poolConfig != null) {
-			pool = new JedisPool(poolConfig, host, port, timeOut, pwd);
+		int timeout = timeOut == null ? Protocol.DEFAULT_TIMEOUT : timeOut;
+		if (StringUtils.isNotEmpty(pwd) && poolConfig != null) {
+			pool = new JedisPool(poolConfig, host, port, timeout, pwd);
 		} else if (poolConfig != null) {
 			pool = new JedisPool(poolConfig, host, port);
 		} else {

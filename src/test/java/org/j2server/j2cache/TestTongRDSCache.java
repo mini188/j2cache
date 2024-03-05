@@ -27,6 +27,7 @@ public class TestTongRDSCache {
 		PropsUtils.setRedisHost("10.18.1.209");
 		PropsUtils.setRedisPort(6379);
 		PropsUtils.setRedisKeyPrefix("j2cache");
+		PropsUtils.setRedisPassword("hundsun@1");
 
 		//sentinels pool
 //		PropsUtils.setCacheStrategyClass(RedisCacheStategy.class.getName());

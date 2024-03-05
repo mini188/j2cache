@@ -35,14 +35,6 @@ public class PropsUtils {
     private static String redisKeyPrefix = "";
 	private static JedisPoolConfig jedisPoolConfig;
 
-	public static String getRedisPwd() {
-		return redisPwd;
-	}
-
-	public static void setRedisPwd(String redisPwd) {
-		PropsUtils.redisPwd = redisPwd;
-	}
-
 	public static String getRedisMasterName() {
 		return redisMasterName;
 	}
